@@ -4,4 +4,9 @@
 # from .api.client.client import Client
 # from .api.client.resource import Resource
 
-import api.client.server as server
+# from . import exceptions
+
+
+from whatsnext.api.client.server import Server
+from whatsnext.api.client.job import Job
+from whatsnext.api.client.client import Client

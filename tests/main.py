@@ -1,6 +1,7 @@
 from time import sleep
 import sys
 import os
+
 sys.path.append(os.path.realpath("."))
 
 import whatsnext as wn
@@ -21,10 +22,13 @@ server = wn.Server("127.0.0.1", 8808)
 
 
 ####### Projects on server
-# add project
+# add project
 server.append_project("Test Project", "This is a test project")
 server.append_project("project_name", "This is a test project 2")
-# get project
+
+server.list_projects()
+
+# get project
 project = server.get_project("project_name")
 # delete project
 server.delete_project("project_name")
@@ -32,16 +36,17 @@ server.delete_project("project_name")
 ######## Handle jobs in project
 project.append_queue(wn.Job("sailing-abroad-1", "train", parameters={"a": 1, "b": 1}))
 project.append_queue(wn.Job("sailing-abroad-2", "train", parameters={"a": 1, "b": 2}))
-# project.pop_queue()
+# project.pop_queue()
 # project.clear_queue()
 # project.get_queue()
 # project.set_description("This is a test project 3") set_title
 
 client = wn.Client("usernamee", "ClusterA", "", project)
-resource = client.allocate_resource(cpu=-1, accelerator=[0,1])
+resource = client.allocate_resource(cpu=-1, accelerator=[0, 1])
+resource2 = client.allocate_resource(cpu=-1, accelerator=[2, 3])
 
 while resource.active():
     job = project.fetch_job()
-    job.run()
+    job.run(resource)
 
 print("A")

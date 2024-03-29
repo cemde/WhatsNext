@@ -1,16 +1,18 @@
 from datetime import datetime
-from .project import Project
+from typing import List
+
 from .utils import random_string
+from .resource import Resource
 
 
 class Client:
     def __init__(
-            self,
-            entity: str,
-            name: str,
-            description: str,
-            project: Project,
-            ) -> None:
+        self,
+        entity: str,
+        name: str,
+        description: str,
+        project: "Project",
+    ) -> None:
         self.id = random_string()
         self.entity = entity
         self.name = name
@@ -20,13 +22,13 @@ class Client:
         self.updated_at = datetime.now()
         self.active_resources = []
 
-    def allocate_resource(self, cpu: int, accelerator: List[int]) -> Resource:  # TODO:
+    def allocate_resource(self, cpu: int, accelerator: List[int]) -> "Resource":
         resource = Resource(cpu, accelerator, self)
         self.active_resources.append(resource)
         return resource
 
-    def append_artifact(self, artifact: Artifact):
+    def append_artifact(self, artifact: "Artifact"):
         pass
 
-    def extend_artifacts(self, artifacts: List[Artifact]):
+    def extend_artifacts(self, artifacts: List["Artifact"]):
         pass

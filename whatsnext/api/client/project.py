@@ -3,12 +3,9 @@ from typing import List
 from .utils import random_string
 from .job import Job
 
+
 class Project:
-    def __init__(
-            self,
-            id: str = None,
-            _server = None
-            ) -> None:
+    def __init__(self, id: str = None, _server=None) -> None:
         if id is None:
             self.id = random_string()
         else:
@@ -22,15 +19,15 @@ class Project:
     @property
     def name(self) -> str:
         return self._server._project_connector.get_name(self)
-    
+
     @property
     def description(self) -> str:
         return self._server._project_connector.get_description(self)
-    
+
     @property
     def status(self) -> str:
         return self._server._project_connector.get_status(self)
-    
+
     @property
     def created_at(self) -> datetime:
         return self._server._project_connector.get_created_at(self)
@@ -58,7 +55,4 @@ class Project:
         self._server.get_queue(self)
 
     def fetch_job(self):
-        for job in self.queue:
-            if job.status == "pending":
-                return job
-        raise RuntimeError("All jobs done.")
+        return self._server.fetch_job(self)
