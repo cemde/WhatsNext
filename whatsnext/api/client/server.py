@@ -5,7 +5,6 @@ from .project import Project
 from datetime import datetime
 from .utils import random_string
 
-from .formatter import Formatter
 from .exceptions import EmptyQueueError
 
 # dummy server
