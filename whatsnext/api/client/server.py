@@ -4,7 +4,9 @@ from typing import List, Any
 from .project import Project
 from datetime import datetime
 from .utils import random_string
-from whatsnext.api.client.exceptions import EmptyQueueError
+
+from .formatter import Formatter
+from .exceptions import EmptyQueueError
 
 # dummy server
 dummy_projects = {}

@@ -3,6 +3,8 @@ from .utils import random_string
 from datetime import datetime
 import os
 
+from .exceptions import EmptyQueueError
+
 
 class Job:
     def __init__(

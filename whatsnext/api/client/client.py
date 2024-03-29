@@ -27,6 +27,9 @@ class Client:
         self.active_resources.append(resource)
         return resource
 
+    def free_resource(self, resource: "Resource") -> None:
+        self.active_resources.remove(resource)
+
     def append_artifact(self, artifact: "Artifact"):
         pass
 

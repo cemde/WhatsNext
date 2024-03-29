@@ -5,6 +5,7 @@ import os
 sys.path.append(os.path.realpath("."))
 
 import whatsnext as wn
+from whatsnext.api.client.exceptions import EmptyQueueError
 
 
 def train_model(artifact: str, resource: str, learning_rate: float, num_hidden: int = 5):
@@ -46,7 +47,10 @@ resource = client.allocate_resource(cpu=-1, accelerator=[0, 1])
 resource2 = client.allocate_resource(cpu=-1, accelerator=[2, 3])
 
 while resource.active():
-    job = project.fetch_job()
-    job.run(resource)
+    try:
+        job = project.fetch_job()
+        job.run(resource)
+    except EmptyQueueError:
+        resource.set_status("inactive")
 
-print("A")
+client.free_resource(resource2)
