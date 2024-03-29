@@ -1,8 +1,7 @@
 from time import sleep
-import sys
 import os
-
-sys.path.append(os.path.realpath("."))
+import re
+from typing import Any, Dict
 
 import whatsnext as wn
 from whatsnext.api.client.exceptions import EmptyQueueError
@@ -42,7 +41,23 @@ project.append_queue(wn.Job("sailing-abroad-2", "train", parameters={"a": 1, "b"
 # project.get_queue()
 # project.set_description("This is a test project 3") set_title
 
-client = wn.Client("usernamee", "ClusterA", "", project)
+
+class TrainCLIFormatter:
+    def __init__(self, executable_path: str, file: str) -> None:
+        self.executable_path = executable_path
+        self.file = file
+
+    def __call__(self, parameters: Dict[str, Any]) -> str:
+        cmd = self.executable_path
+        cmd += f" {self.file}"
+        for key, value in parameters.items():
+            cmd += f" --{key} {value}"
+        return cmd
+
+
+formatter = TrainCLIFormatter("python3", "tests/train.py")
+
+client = wn.Client("usernamee", "ClusterA", "", project, formatter)
 resource = client.allocate_resource(cpu=-1, accelerator=[0, 1])
 resource2 = client.allocate_resource(cpu=-1, accelerator=[2, 3])
 

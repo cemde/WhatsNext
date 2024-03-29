@@ -3,6 +3,7 @@ from typing import List
 
 from .utils import random_string
 from .resource import Resource
+from .formatter import Formatter
 
 
 class Client:
@@ -12,6 +13,7 @@ class Client:
         name: str,
         description: str,
         project: "Project",
+        formatter: Formatter,
     ) -> None:
         self.id = random_string()
         self.entity = entity
@@ -20,6 +22,7 @@ class Client:
         self.description = description
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
+        self.formatter = formatter
         self.active_resources = []
 
     def allocate_resource(self, cpu: int, accelerator: List[int]) -> "Resource":

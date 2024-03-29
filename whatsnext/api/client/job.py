@@ -41,9 +41,9 @@ class Job:
     def run(self, resource) -> int:
         self.set_status_to("running")
         try:
-            command = resource.client.Formatter(self.task, self.parameters)
+            command = resource.client.formatter(self.parameters)
             os.system(command)
-            self.set_status_to()
+            self.set_status_to("completed")
         except Exception as e:
             self.set_status_to("failed")
         return 0
