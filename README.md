@@ -32,3 +32,12 @@ psql postgres
 ```
 cat /opt/homebrew/var/log/postgres.log
 ```
+
+##  TODO
+
+* protected Routes
+* Env Variables in Tutorial
+* SQL joins
+* SQL foreign keys
+* Disable SQLA create Engine
+* CORS
