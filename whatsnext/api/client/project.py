@@ -1,8 +1,9 @@
 from datetime import datetime
 from typing import List
-from .utils import random_string
-from .job import Job
+
 from .exceptions import EmptyQueueError
+from .job import Job
+from .utils import random_string
 
 
 class Project:

@@ -1,8 +1,9 @@
-from .database import Base
 import enum
-from sqlalchemy import Column, Integer, String, Enum
-from sqlalchemy.sql.sqltypes import JSON, TIMESTAMP
+from sqlalchemy import Column, Enum, Integer, String
 from sqlalchemy.sql.expression import text
+from sqlalchemy.sql.sqltypes import JSON, TIMESTAMP
+
+from .database import Base
 
 
 class JobStatus(enum.Enum):

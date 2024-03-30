@@ -1,6 +1,5 @@
 from typing import List
 
-
 RESOURCE_STATUS = ["active", "inactive"]
 
 

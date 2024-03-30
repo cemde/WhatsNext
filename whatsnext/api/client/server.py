@@ -1,11 +1,10 @@
 from __future__ import annotations
-
-from typing import List, Any
-from .project import Project
 from datetime import datetime
-from .utils import random_string
+from typing import Any, List
 
 from .exceptions import EmptyQueueError
+from .project import Project
+from .utils import random_string
 
 # dummy server
 dummy_projects = {}

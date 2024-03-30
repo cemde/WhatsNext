@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import List
 
-from .utils import random_string
-from .resource import Resource
 from .formatter import Formatter
+from .resource import Resource
+from .utils import random_string
 
 
 class Client:

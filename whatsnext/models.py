@@ -1,7 +1,6 @@
-from datetime import datetime
-from typing import Any, Dict, Literal, List, Union
-
 import uuid
+from datetime import datetime
+from typing import Any, Dict, List, Literal, Union
 
 
 # create random alphanumeric string

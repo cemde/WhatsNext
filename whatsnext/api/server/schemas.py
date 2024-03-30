@@ -1,8 +1,8 @@
-from pydantic import BaseModel
-from typing import Dict, Any
 from datetime import datetime
+from typing import Any, Dict
+from pydantic import BaseModel
 
-from .models import DEFAULT_PROJECT_STATUS, DEFAULT_JOB_STATUS
+from .models import DEFAULT_JOB_STATUS, DEFAULT_PROJECT_STATUS
 
 # class Job(BaseModel):
 #     id: int = None

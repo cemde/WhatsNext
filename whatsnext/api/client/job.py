@@ -1,9 +1,9 @@
-from typing import Dict, Any, List
-from .utils import random_string
-from datetime import datetime
 import os
+from datetime import datetime
+from typing import Any, Dict, List
 
 from .exceptions import EmptyQueueError
+from .utils import random_string
 
 
 class Job:
