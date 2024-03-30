@@ -3,9 +3,11 @@ from typing import Any, Dict, Literal, List, Union
 
 import uuid
 
+
 # create random alphanumeric string
 def random_string(length: int = 128) -> str:
     return str(uuid.uuid4().hex)[:length]
+
 
 PROJECT_SATUS = ("active", "archieved")
 
@@ -13,15 +15,17 @@ PROJECT_SATUS = ("active", "archieved")
 class Formatter:
     pass
 
+
 class SlurmFormatter(Formatter):
     pass
+
 
 class BashFormatter(Formatter):
     pass
 
+
 class RUNAIFormatter(Formatter):
     pass
-
 
 
 class Status:
@@ -30,14 +34,13 @@ class Status:
         self.client = None
 
 
-
 class Project:
     def __init__(
-            self,
-            name: str,
-            description: str,
-            status: str = "active",
-            ) -> None:
+        self,
+        name: str,
+        description: str,
+        status: str = "active",
+    ) -> None:
         self.id = random_string()
         self.name = name
         self.description = description

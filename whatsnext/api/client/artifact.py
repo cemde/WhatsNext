@@ -1,10 +1,2 @@
-
 class Artifact:
     pass
-
-
-
-
-   
-
-
