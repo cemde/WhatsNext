@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import Column, Enum, Integer, String
+from sqlalchemy import Column, Enum, ForeignKey, Integer, String
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import JSON, TIMESTAMP
 
@@ -23,7 +23,7 @@ class Job(Base):
 
     id = Column(Integer, primary_key=True, index=True, nullable=False)
     name = Column(String, index=True, nullable=False)
-    project = Column(String, nullable=False)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
     parameters = Column(JSON, nullable=False)
     status = Column(Enum(JobStatus), nullable=False, default=JobStatus.PENDING)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))

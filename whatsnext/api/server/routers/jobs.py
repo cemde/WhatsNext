@@ -25,6 +25,11 @@ def get_job(id: int, db: Session = Depends(get_db)):
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.JobResponse)
 def add_job(job: schemas.JobCreate, db: Session = Depends(get_db)):
+    # validate that project exists
+    project = db.query(models.Project).filter(models.Project.id == job.project_id).first()
+    if project is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Project with {job.project_id=} not found.")
+    # create new job
     new_job = models.Job(**job.model_dump())
     db.add(new_job)
     db.commit()
@@ -34,6 +39,12 @@ def add_job(job: schemas.JobCreate, db: Session = Depends(get_db)):
 
 @router.put("/{id}")  # status_code=status.HTTP_200_OK
 def update_job(id: int, job: schemas.JobUpdate, db: Session = Depends(get_db)):
+    # validate that project exists
+    project = db.query(models.Project).filter(models.Project.id == job.project_id).first()
+    if project is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Project with {job.project_id=} not found.")
+
+    # udpate job
     job_query = db.query(models.Job).filter(models.Job.id == id)
     old_job = job_query.first()
     if old_job is None:

@@ -5,21 +5,10 @@ from pydantic import BaseModel
 
 from .models import DEFAULT_JOB_STATUS, DEFAULT_PROJECT_STATUS
 
-# class Job(BaseModel):
-#     id: int = None
-#     name: str
-#     project: str
-#     parameters: Dict[str, Any]
-#     status: str = None
-#     created_at: str = None
-#     updated_at: str = None
-#     priority: int = 0
-#     depends: Dict[str, Any] = None
-
 
 class JobBase(BaseModel):
     name: str
-    project: str
+    project_id: int
     parameters: Dict[str, Any]
 
 
