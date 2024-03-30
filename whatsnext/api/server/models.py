@@ -1,7 +1,8 @@
 from .database import Base
 from sqlalchemy import Column, Integer, String, DateTime
 from datetime import datetime
-from sqlalchemy.dialects.postgresql import JSON
+from sqlalchemy.sql.sqltypes import JSON, TIMESTAMP
+from sqlalchemy.sql.expression import text
 
 
 class Job(Base):
@@ -12,10 +13,10 @@ class Job(Base):
     project = Column(String, nullable=False)
     parameters = Column(JSON, nullable=False)
     status = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
+    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
     priority = Column(Integer, default=0)
-    depends = Column(JSON, default=[])
+    depends = Column(JSON, default={})
 
     def __repr__(self):
         return f"<Job {self.name}>"
