@@ -1,6 +1,4 @@
 from time import sleep
-import os
-import re
 from typing import Any, Dict
 
 import whatsnext as wn
