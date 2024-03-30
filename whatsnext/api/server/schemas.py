@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Any, Dict
+
 from pydantic import BaseModel
 
 from .models import DEFAULT_JOB_STATUS, DEFAULT_PROJECT_STATUS

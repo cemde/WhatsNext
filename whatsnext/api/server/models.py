@@ -1,4 +1,5 @@
 import enum
+
 from sqlalchemy import Column, Enum, Integer, String
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import JSON, TIMESTAMP
