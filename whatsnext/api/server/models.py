@@ -13,6 +13,9 @@ class JobStatus(enum.Enum):
     FAILED = "failed"  # Job has failed
 
 
+DEFAULT_JOB_STATUS = JobStatus.PENDING
+
+
 class Job(Base):
     __tablename__ = "jobs"
 
@@ -35,6 +38,9 @@ class ProjectStatus(enum.Enum):
     ARCHIVED = "archived"
 
 
+DEFAULT_PROJECT_STATUS = ProjectStatus.ACTIVE
+
+
 class Project(Base):
     __tablename__ = "projects"
 
@@ -43,7 +49,7 @@ class Project(Base):
     description = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
-    status = Column(Enum(ProjectStatus), nullable=False, default=ProjectStatus.ACTIVE)
+    status = Column(Enum(ProjectStatus), nullable=False, default=DEFAULT_PROJECT_STATUS)
 
     def __repr__(self):
         return f"<Project {self.name}>"

@@ -2,6 +2,8 @@ from pydantic import BaseModel
 from typing import Dict, Any
 from datetime import datetime
 
+from .models import DEFAULT_PROJECT_STATUS, DEFAULT_JOB_STATUS
+
 # class Job(BaseModel):
 #     id: int = None
 #     name: str
@@ -21,7 +23,7 @@ class JobBase(BaseModel):
 
 
 class JobCreate(JobBase):
-    status: str = "pending"
+    status: str = DEFAULT_JOB_STATUS
     priority: int = 0
     depends: Dict[str, Any] = {}
 
@@ -48,7 +50,7 @@ class ProjectBase(BaseModel):
 
 
 class ProjectCreate(ProjectBase):
-    status: str = "active"
+    status: str = DEFAULT_PROJECT_STATUS
     description: str = ""
 
 

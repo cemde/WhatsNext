@@ -41,3 +41,11 @@ cat /opt/homebrew/var/log/postgres.log
 * SQL foreign keys
 * Disable SQLA create Engine
 * CORS
+
+## DB Model TODO
+
+1. Join, foreign key,
+2. tags for job
+3. Task table, register task with project, task field for job.
+3. Job Status to seperate table: status_id, string, running_on.
+4. Depends on seperate table?
