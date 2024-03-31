@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from . import models
 from .database import engine, get_db
-from .routers import jobs, projects
+from .routers import jobs, projects, tasks
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -11,11 +11,7 @@ app = FastAPI()
 
 app.include_router(jobs.router)
 app.include_router(projects.router)
-
-
-@app.get("/")
-async def root1():
-    return {"message": "App 1"}
+app.include_router(tasks.router)
 
 
 @app.get("/checkdb")

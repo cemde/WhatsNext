@@ -49,3 +49,9 @@ cat /opt/homebrew/var/log/postgres.log
 3. Task table, register task with project, task field for job.
 3. Job Status to seperate table: status_id, string, running_on.
 4. Depends on seperate table?
+
+## Next steps
+
+1. define a consistent datamodel in and out (eg. task_name etc)
+2. be consitent with checks and return cose
+3.

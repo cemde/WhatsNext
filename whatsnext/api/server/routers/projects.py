@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -31,7 +31,7 @@ def get_projects(
     status: str = "ACTIVE",
     # search: Optional[str] = "Inventing AGI",
 ):
-    # Validate status
+    # Validate status # TODO move validation to pydantic schema
     if status not in models.ProjectStatus.__members__:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid status {status=}")
 
@@ -43,7 +43,6 @@ def get_projects(
         .offset(skip)
         .all()
     )
-    print(projects)
     return projects
 
 

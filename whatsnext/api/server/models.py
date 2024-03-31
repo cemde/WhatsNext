@@ -24,6 +24,7 @@ class Job(Base):
     id = Column(Integer, primary_key=True, index=True, nullable=False)
     name = Column(String, index=True, nullable=False)
     project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    task_id = Column(Integer, ForeignKey("tasks.id", ondelete="CASCADE"), nullable=True)
     parameters = Column(JSON, nullable=False)
     status = Column(Enum(JobStatus), nullable=False, default=JobStatus.PENDING)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
@@ -55,3 +56,16 @@ class Project(Base):
 
     def __repr__(self):
         return f"<Project {self.name}>"
+
+
+class Task(Base):
+    __tablename__ = "tasks"
+
+    id = Column(Integer, primary_key=True, index=True, nullable=False)
+    name = Column(String, index=True, nullable=False)
+    project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
+    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
+
+    def __repr__(self):
+        return f"<Task {self.name}>"

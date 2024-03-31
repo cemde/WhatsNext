@@ -10,6 +10,7 @@ class JobBase(BaseModel):
     name: str
     project_id: int
     parameters: Dict[str, Any]
+    task_id: int
 
 
 class JobCreate(JobBase):
@@ -49,6 +50,28 @@ class ProjectUpdate(ProjectBase):
 
 
 class ProjectResponse(ProjectBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class TaskBase(BaseModel):
+    name: str
+    project_id: int
+
+
+class TaskCreate(TaskBase):
+    pass
+
+
+class TaskUpdate(TaskBase):
+    pass
+
+
+class TaskResponse(TaskBase):
     id: int
     created_at: datetime
     updated_at: datetime
