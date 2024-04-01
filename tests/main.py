@@ -16,7 +16,7 @@ def train_model(artifact: str, resource: str, learning_rate: float, num_hidden: 
 
 
 # Connect to server
-server = wn.Server("127.0.0.1", 8808)
+server = wn.Server("127.0.0.1", 8000)
 
 
 ####### Projects on server
@@ -27,9 +27,13 @@ server.append_project("project_name", "This is a test project 2")
 server.list_projects()
 
 # get project
-project = server.get_project("project_name")
+project = server.get_project("Test Project")
 # delete project
 server.delete_project("project_name")
+
+
+project.create_task("train")
+
 
 ######## Handle jobs in project
 project.append_queue(wn.Job("sailing-abroad-1", "train", parameters={"a": 1, "b": 1}))

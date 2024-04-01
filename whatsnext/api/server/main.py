@@ -15,5 +15,10 @@ app.include_router(tasks.router)
 
 
 @app.get("/checkdb")
-def check_db(response: Response, db: Session = Depends(get_db)):
+def check_db(db: Session = Depends(get_db)):
     return {"message": "DB is working"}
+
+
+@app.get("/")
+def check_connection():
+    return {"message": "OK"}

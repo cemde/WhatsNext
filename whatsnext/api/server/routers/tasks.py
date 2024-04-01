@@ -36,6 +36,14 @@ def get_task(id: int, db: Session = Depends(get_db)):
     return task
 
 
+@router.get("/name/{name}", response_model=schemas.TaskResponse)
+def get_task_by_name(name: str, db: Session = Depends(get_db), project_id: Optional[int] = None):
+    task = db.query(models.Task).filter(models.Task.name == name).filter(models.Task.project_id == project_id).first()
+    if not task:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project with {id=} not found.")
+    return task
+
+
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=schemas.TaskResponse)
 def add_task(task: schemas.TaskCreate, db: Session = Depends(get_db)):
     # validate that project exists

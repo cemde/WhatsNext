@@ -13,17 +13,20 @@ class Job:
         task: str,
         parameters: Dict[str, Any],
         priority: int = 0,
+        status: str = "PENDING",
         depends: List[Any] = None,  # Any replaced by Job
+        created_at: datetime = None,
+        updated_at: datetime = None,
     ) -> None:
         self.id = None
         self.name = name
         self.task = task
         self.parameters = parameters
-        self.created_at = datetime.now()
-        self.updated_at = datetime.now()
-        self.status = "pending"
         self.priority = priority
+        self.status = status
         self.depends = depends
+        self.created_at = created_at
+        self.updated_at = updated_at
         self._server = None
 
     def set_status_to(self, status: str = "completed") -> None:

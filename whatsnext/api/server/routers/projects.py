@@ -23,6 +23,14 @@ def get_project(id: int, db: Session = Depends(get_db)):
     return project
 
 
+@router.get("/name/{name}", response_model=schemas.ProjectResponse)
+def get_project_by_name(name: str, db: Session = Depends(get_db)):
+    project = db.query(models.Project).filter(models.Project.name == name).first()
+    if not project:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project with {id=} not found.")
+    return project
+
+
 @router.get("/", response_model=List[schemas.ProjectResponse])
 def get_projects(
     db: Session = Depends(get_db),
@@ -68,8 +76,17 @@ def update_project(id: int, project: schemas.ProjectUpdate, db: Session = Depend
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_project(id, db: Session = Depends(get_db)):
+def delete_project(str, db: Session = Depends(get_db)):
     project = db.query(models.Project).filter(models.Project.id == id)
+    if project.first() is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Job with {id=} not found.")
+    project.delete(synchronize_session=False)
+    db.commit()
+
+
+@router.delete("/name/{name}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_project_by_name(name: str, db: Session = Depends(get_db)):
+    project = db.query(models.Project).filter(models.Project.name == name)
     if project.first() is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Job with {id=} not found.")
     project.delete(synchronize_session=False)

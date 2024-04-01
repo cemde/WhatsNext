@@ -58,3 +58,6 @@ class Project:
 
     def fetch_job(self):
         return self._server.fetch_job(self)
+
+    def create_task(self, task_name: str):
+        return self._server.create_task(self, task_name)
