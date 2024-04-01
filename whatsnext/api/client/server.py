@@ -39,6 +39,7 @@ class ProjectConnector:
         return dummy_projects[project.id]["description"]
 
     def set_description(self, project, description: str) -> str:
+        r = requests.patch(f"{self._server._url()}/projects/{project.id}", json={"description": description})
         dummy_projects[project.id]["description"] = description
 
     def get_status(self, project) -> str:
@@ -139,13 +140,19 @@ class Server:
         print(f"Sucessfully connected to server {self.hostname}:{self.port}.")
 
     def fetch_job(self, project: Project):
-        for job_id, job_dict in dummy_jobs.items():
-            if job_dict["project_id"] == project.id and job_dict["job"].status == "pending":
-                job_dict["job"].status = "queued"
-                job_dict["job"]._bind_server(self)
-                return job_dict["job"]
-        raise EmptyQueueError("No jobs in queue")
-        print("All Done!")
+        r = requests.get(f"{self._url()}/projects/{project.id}/fetch_job")
+        if r.status_code == 200:
+            if r.json()["num_pending"] == 0:
+                raise EmptyQueueError("No jobs in queue")
+            job = r.json()
+            return job
+        # for job_id, job_dict in dummy_jobs.items():
+        #     if job_dict["project_id"] == project.id and job_dict["job"].status == "pending":
+        #         job_dict["job"].status = "queued"
+        #         job_dict["job"]._bind_server(self)
+        #         return job_dict["job"]
+        # raise EmptyQueueError("No jobs in queue")
+        # print("All Done!")
 
     def create_task(self, project: Project, task_name: str):
         r = requests.post(self._url() + "/tasks", json={"name": task_name, "project_id": project.id})

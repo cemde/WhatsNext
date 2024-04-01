@@ -3,6 +3,7 @@ import enum
 from sqlalchemy import Column, Enum, ForeignKey, Integer, String
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import JSON, TIMESTAMP
+from sqlalchemy.schema import UniqueConstraint
 
 from .database import Base
 
@@ -28,7 +29,7 @@ class Job(Base):
     parameters = Column(JSON, nullable=False)
     status = Column(Enum(JobStatus), nullable=False, default=JobStatus.PENDING)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
-    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
+    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"), server_onupdate=text("now()"))
     priority = Column(Integer, default=0, nullable=False)
     depends = Column(JSON, default={}, nullable=False)
 
@@ -51,7 +52,7 @@ class Project(Base):
     name = Column(String, index=True, nullable=False)
     description = Column(String, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
-    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
+    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"), server_onupdate=text("now()"))
     status = Column(Enum(ProjectStatus), nullable=False, default=DEFAULT_PROJECT_STATUS)
 
     def __repr__(self):
@@ -65,7 +66,9 @@ class Task(Base):
     name = Column(String, index=True, nullable=False)
     project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
-    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
+    updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"), server_onupdate=text("now()"))
+
+    __table_args__ = (UniqueConstraint("name", "project_id", name="unique_task_name_project_id"),)
 
     def __repr__(self):
         return f"<Task {self.name}>"

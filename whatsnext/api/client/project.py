@@ -57,7 +57,14 @@ class Project:
         self._server.get_queue(self)
 
     def fetch_job(self):
-        return self._server.fetch_job(self)
+        return_value = self._server.fetch_job(self)
+        job = return_value["job"]
+        num_pending = return_value["num_pending"]
+        del job["project_id"]
+        return Job(**job)
 
     def create_task(self, task_name: str):
         return self._server.create_task(self, task_name)
+
+    def set_description(self, description: str):
+        return self._server._project_connector.set_description(self, description)

@@ -91,3 +91,27 @@ def delete_project_by_name(name: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Job with {id=} not found.")
     project.delete(synchronize_session=False)
     db.commit()
+
+
+@router.get("/{id}/fetch_job", response_model=schemas.JobAndCountResponse)
+def fetch_job(id: int, db: Session = Depends(get_db)):
+    job_count = db.query(models.Job).filter(models.Job.project_id == id).filter(models.Job.status == models.JobStatus.PENDING).count()
+    if job_count == 0:
+        return {"count": 0, "data": None}
+    # job, task_name
+    job = (
+        db.query(models.Job)  # , models.Task.name)
+        # .join(models.Task, models.Job.task_id == models.Task.id, isouter=True)
+        .filter(models.Job.project_id == id)
+        .filter(models.Job.status == models.JobStatus.PENDING)
+        .order_by(models.Job.priority.desc())
+        .first()
+    )
+    db.query(models.Job).filter(models.Job.id == job.id).update({"status": models.JobStatus.QUEUED}, synchronize_session=False)
+    db.commit()
+    db.refresh(job)
+    # job.task_id = None
+    # job.task_name = task_name
+    # if job.first() is None:
+    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Job with {id=} not found.")
+    return {"job": job, "num_pending": job_count}

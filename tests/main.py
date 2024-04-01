@@ -41,7 +41,7 @@ project.append_queue(wn.Job("sailing-abroad-2", "train", parameters={"a": 1, "b"
 # project.pop_queue()
 # project.clear_queue()
 # project.get_queue()
-# project.set_description("This is a test project 3") set_title
+# project.set_description("This is a test project 3")
 
 
 class TrainCLIFormatter:
