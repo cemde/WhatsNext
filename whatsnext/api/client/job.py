@@ -17,8 +17,9 @@ class Job:
         depends: List[Any] = None,  # Any replaced by Job
         created_at: datetime = None,
         updated_at: datetime = None,
+        id: int = None,
     ) -> None:
-        self.id = None
+        self.id = id
         self.name = name
         self.task = task
         self.parameters = parameters
@@ -29,8 +30,8 @@ class Job:
         self.updated_at = updated_at
         self._server = None
 
-    def set_status_to(self, status: str = "completed") -> None:
-        self._server._job_connector.set_status_to(self, status)
+    def set_status(self, status: str = "completed") -> None:
+        self._server._job_connector.set_status(self, status)
         self.status = status
 
     def set_priority_to(self, priority: int) -> None:
@@ -42,14 +43,17 @@ class Job:
         self.depends = depends
 
     def run(self, resource) -> int:
-        self.set_status_to("running")
+        self.set_status("RUNNING")
         try:
             command = resource.client.formatter(self.parameters)
             os.system(command)
-            self.set_status_to("completed")
+            self.set_status("completed")
         except Exception as e:
-            self.set_status_to("failed")
+            self.set_status("failed")
         return 0
 
     def _bind_server(self, server) -> None:
         self._server = server
+
+    def __repr__(self) -> str:
+        return f"<Job {self.id}: {self.name} of Task '{self.task}' [{self.priority}]>"

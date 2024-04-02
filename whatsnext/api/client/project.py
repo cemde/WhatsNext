@@ -61,6 +61,9 @@ class Project:
         job = return_value["job"]
         num_pending = return_value["num_pending"]
         del job["project_id"]
+        del job["task_id"]
+        job["task"] = job["task_name"]
+        del job["task_name"]
         return Job(**job)
 
     def create_task(self, task_name: str):

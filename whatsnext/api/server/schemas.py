@@ -29,6 +29,15 @@ class JobResponse(JobBase):
     id: int
     created_at: datetime
     updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class JobWithTaskNameResponse(JobBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
     task_name: str
 
     class Config:
@@ -36,7 +45,7 @@ class JobResponse(JobBase):
 
 
 class JobAndCountResponse(BaseModel):
-    job: JobResponse
+    job: JobWithTaskNameResponse
     num_pending: int
 
     class Config:

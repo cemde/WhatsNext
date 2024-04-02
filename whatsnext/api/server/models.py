@@ -1,22 +1,11 @@
-import enum
-
 from sqlalchemy import Column, Enum, ForeignKey, Integer, String
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import JSON, TIMESTAMP
 from sqlalchemy.schema import UniqueConstraint
 
+from ..shared.status import JobStatus, ProjectStatus, DEFAULT_PROJECT_STATUS, DEFAULT_JOB_STATUS
+
 from .database import Base
-
-
-class JobStatus(enum.Enum):
-    PENDING = "pending"  # Job is waiting to be scheduled
-    QUEUED = "queued"  # Job is scheduled locally but not running yet.
-    RUNNING = "running"  # Job is running
-    COMPLETED = "completed"  # Job has completed successfully
-    FAILED = "failed"  # Job has failed
-
-
-DEFAULT_JOB_STATUS = JobStatus.PENDING
 
 
 class Job(Base):
@@ -35,14 +24,6 @@ class Job(Base):
 
     def __repr__(self):
         return f"<Job {self.name}>"
-
-
-class ProjectStatus(enum.Enum):
-    ACTIVE = "active"
-    ARCHIVED = "archived"
-
-
-DEFAULT_PROJECT_STATUS = ProjectStatus.ACTIVE
 
 
 class Project(Base):

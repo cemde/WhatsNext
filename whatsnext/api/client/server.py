@@ -56,7 +56,8 @@ class JobConnector:
     def __init__(self, server: Server) -> None:
         pass
 
-    def set_status_to(self, job, status: str) -> None:
+    def set_status(self, job, status: str) -> None:
+        r = requests.patch(f"{self._server._url()}/jobs/{job.id}", json={"status": status})
         dummy_jobs[job.id]["status"] = status
 
 
