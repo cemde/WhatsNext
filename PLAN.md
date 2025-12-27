@@ -199,18 +199,18 @@ Complete the queue management API.
 
 ---
 
-## Phase 5: Job Dependencies
+## Phase 5: Job Dependencies ✅ COMPLETE
 
 Enforce job execution order.
 
 ### 5.1 Server-side dependency resolution
-- [ ] `fetch_job` only returns jobs whose dependencies are COMPLETED
-- [ ] Track dependency graph
-- [ ] Detect circular dependencies on job creation
+- [x] `fetch_job` only returns jobs whose dependencies are COMPLETED
+- [x] Track dependency graph
+- [x] Detect circular dependencies on job creation
 
 ### 5.2 Dependency status propagation
-- [ ] If dependency FAILED, mark dependent jobs as BLOCKED or FAILED
-- [ ] API to query job dependency status
+- [x] If dependency FAILED, mark dependent jobs as BLOCKED
+- [x] API to query job dependency status (`GET /jobs/{id}/dependencies`)
 
 ---
 
@@ -286,11 +286,11 @@ For external/public-facing servers.
 - Phase 2: Formatter System ✅
 - Phase 3: Worker Loop ✅
 - Phase 4: Queue Operations ✅
+- Phase 5: Job Dependencies ✅
 
 **Next Steps:**
-1. **Phase 5**: Implement job dependency enforcement
-2. **Phase 6**: Enhanced resource management
-3. **Phase 7**: Write tests and documentation
-4. **Phase 8**: Add authentication and security features
+1. **Phase 6**: Enhanced resource management
+2. **Phase 7**: Write tests and documentation
+3. **Phase 8**: Add authentication and security features
 
-The system now has a minimal working implementation where a client can continuously pull and execute jobs with proper formatting, queue management, and graceful shutdown.
+The system now has a working implementation with job dependency enforcement, where jobs are only fetched when their dependencies are completed, circular dependencies are detected, and failure status propagates to dependent jobs.

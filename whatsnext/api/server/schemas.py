@@ -73,6 +73,21 @@ class QueueClearResponse(BaseModel):
     deleted: int
 
 
+class DependencyInfo(BaseModel):
+    job_id: int
+    job_name: str
+    status: str
+
+
+class JobDependencyStatusResponse(BaseModel):
+    job_id: int
+    job_name: str
+    status: str
+    dependencies: List[DependencyInfo]
+    all_completed: bool
+    has_failed: bool
+
+
 class ProjectBase(BaseModel):
     name: str
     description: str

@@ -21,10 +21,8 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
-dependencies = [
-    "pydantic>=2.0.0",
-    "pydantic-settings>=2.0.0",
-]
+# Core has no dependencies - client and server are optional
+dependencies = []
 
 [project.optional-dependencies]
 # Server dependencies (FastAPI + PostgreSQL)

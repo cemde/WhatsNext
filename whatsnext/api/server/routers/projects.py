@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from .. import models, schemas
 from ..database import get_db
+from ..dependencies import get_jobs_with_completed_dependencies
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
 
@@ -82,17 +83,29 @@ def delete_project_by_name(name: str, db: Session = Depends(get_db)):
 
 @router.get("/{id}/fetch_job", response_model=schemas.JobAndCountResponse)
 def fetch_job(id: int, db: Session = Depends(get_db)):
+    """Fetch the next job ready for execution.
+
+    Only returns jobs whose dependencies are all COMPLETED.
+    Jobs with failed dependencies are automatically marked as BLOCKED.
+    """
+    # Get jobs with completed dependencies (this also marks blocked jobs)
+    ready_jobs = get_jobs_with_completed_dependencies(db, id)
+
+    # Count all pending jobs (including those waiting for dependencies)
     job_count = db.query(models.Job).filter(models.Job.project_id == id).filter(models.Job.status == models.JobStatus.PENDING).count()
-    if job_count == 0:
-        return {"job": None, "num_pending": 0}
-    job, task_name = (
-        db.query(models.Job, models.Task.name)
-        .join(models.Task, models.Job.task_id == models.Task.id, isouter=True)
-        .filter(models.Job.project_id == id)
-        .filter(models.Job.status == models.JobStatus.PENDING)
-        .order_by(models.Job.priority.desc())
-        .first()
-    )
+
+    if not ready_jobs:
+        db.commit()  # Commit any status changes from dependency check
+        return {"job": None, "num_pending": job_count}
+
+    # Get the highest priority job from ready jobs
+    job = ready_jobs[0]
+
+    # Get the task name
+    task = db.query(models.Task).filter(models.Task.id == job.task_id).first()
+    task_name = task.name if task else None
+
+    # Mark job as QUEUED
     db.query(models.Job).filter(models.Job.id == job.id).update({"status": models.JobStatus.QUEUED}, synchronize_session=False)
     db.commit()
     db.refresh(job)

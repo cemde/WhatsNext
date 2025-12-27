@@ -7,6 +7,7 @@ class JobStatus(enum.Enum):
     RUNNING = "running"  # Job is running
     COMPLETED = "completed"  # Job has completed successfully
     FAILED = "failed"  # Job has failed
+    BLOCKED = "blocked"  # Job is blocked because a dependency failed
 
 
 DEFAULT_JOB_STATUS = JobStatus.PENDING
