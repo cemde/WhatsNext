@@ -64,7 +64,9 @@ class Project:
         del job["task_id"]
         job["task"] = job["task_name"]
         del job["task_name"]
-        return Job(**job)
+        job = Job(**job)
+        job._bind_server(self._server)
+        return job
 
     def create_task(self, task_name: str):
         return self._server.create_task(self, task_name)

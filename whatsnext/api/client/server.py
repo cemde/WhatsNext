@@ -30,7 +30,7 @@ class ProjectConnector:
     def get_name(self, project) -> str:
         r = requests.get(f"{self._server._url()}/projects/{project.id}")
         return r.json()["name"]
-        # return dummy_projects[project.id]["name"]
+        # return dummy_projects[project.id]["name"]
 
     def set_name(self, project, name: str) -> str:
         dummy_projects[project.id]["name"] = name
@@ -54,14 +54,10 @@ class ProjectConnector:
 
 class JobConnector:
     def __init__(self, server: Server) -> None:
-        pass
+        self._server = server
 
     def set_status(self, job, status: str) -> None:
         r = requests.patch(f"{self._server._url()}/jobs/{job.id}", json={"status": status})
-        dummy_jobs[job.id]["status"] = status
-
-
-#### This is a dummy class until the FastAPI server is implemented
 
 
 # this class handles all communcation with the server
@@ -114,7 +110,15 @@ class Server:
     def append_queue(self, project, job: Any):
         r = requests.get(f"{self._url()}/tasks/name/{job.task}", params={"project_id": project.id})
         task_id = r.json()["id"]
-        payload = {"name": job.name, "project_id": project.id, "parameters": job.parameters, "task_id": task_id, "status": job.status, "priority": job.priority, "depends": {}}
+        payload = {
+            "name": job.name,
+            "project_id": project.id,
+            "parameters": job.parameters,
+            "task_id": task_id,
+            "status": job.status,
+            "priority": job.priority,
+            "depends": {},
+        }
         r = requests.post(f"{self._url()}/jobs", json=payload)
         if r.status_code == 201:
             print(f"Job '{job.name}' for task '{job.task}' with priority {job.priority} added to queue for project '{project.name}'.")

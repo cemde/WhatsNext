@@ -54,4 +54,4 @@ cat /opt/homebrew/var/log/postgres.log
 
 1. define a consistent datamodel in and out (eg. task_name etc)
 2. be consitent with checks and return cose
-3.
+3. job.run() sync with server.
