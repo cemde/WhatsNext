@@ -1,0 +1,22 @@
+[Unit]
+Description=WhatsNext Job Queue Server
+After=network.target postgresql.service
+
+[Service]
+Type=simple
+User=YOUR_USERNAME
+Group=YOUR_USERNAME
+WorkingDirectory=/home/YOUR_USERNAME/WhatsNext
+ExecStart=/home/YOUR_USERNAME/WhatsNext/.venv/bin/uvicorn whatsnext.api.server.main:app --host 0.0.0.0 --port 8000
+Restart=on-failure
+RestartSec=5
+EnvironmentFile=/home/YOUR_USERNAME/WhatsNext/.env
+
+# Security hardening (optional but recommended)
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/home/YOUR_USERNAME/WhatsNext
+
+[Install]
+WantedBy=multi-user.target

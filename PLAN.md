@@ -252,10 +252,33 @@ Track and enforce resource allocation.
 
 ---
 
+## Phase 8: Deployment & Security
+
+For external/public-facing servers.
+
+### 8.1 Basic deployment (systemd)
+- [x] Document systemd service setup
+- [x] Add example `whatsnext.service` file to repo (`deploy/`)
+- [x] Add deployment README (`deploy/README.md`)
+
+### 8.2 HTTPS with reverse proxy
+- [x] Document nginx/caddy setup for HTTPS termination
+- [x] Add example nginx config to repo (`deploy/nginx.conf`)
+
+### 8.3 Authentication
+- [ ] API key authentication for clients
+- [ ] Environment variable for API key(s)
+- [ ] Middleware to validate requests
+
+### 8.4 Rate limiting & CORS
+- [ ] Add CORS middleware for allowed origins
+- [ ] Basic rate limiting to prevent abuse
+
+---
+
 ## Future Phases (Not Planned Yet)
 
-- **Authentication & Authorization**: Protected routes, API keys, user roles
-- **CORS Configuration**: For web-based clients
+- **User Roles**: Multi-user with permissions
 - **Artifact Management**: Track job inputs/outputs, file storage
 - **Web Dashboard**: Monitor jobs, projects, queue status
 - **Metrics & Monitoring**: Prometheus integration, job duration tracking
