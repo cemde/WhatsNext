@@ -284,3 +284,90 @@ class Server:
             return True
         logger.error(f"Failed to create task: HTTP {r.status_code}")
         return False
+
+    def remove_job(self, project: Project, job_id: int) -> bool:
+        """Remove a specific job from a project's queue.
+
+        Args:
+            project: The project containing the job.
+            job_id: The ID of the job to remove.
+
+        Returns:
+            True if the job was removed, False otherwise.
+        """
+        r = requests.delete(
+            f"{self.base_url}/projects/{project.id}/jobs/{job_id}",
+            timeout=DEFAULT_TIMEOUT,
+        )
+        if r.status_code == 204:
+            logger.info(f"Removed job {job_id} from project {project.id}")
+            return True
+        logger.error(f"Failed to remove job: HTTP {r.status_code}")
+        return False
+
+    def clear_queue(self, project: Project) -> int:
+        """Clear all pending jobs from a project's queue.
+
+        Args:
+            project: The project whose queue to clear.
+
+        Returns:
+            Number of jobs deleted.
+        """
+        r = requests.delete(
+            f"{self.base_url}/projects/{project.id}/queue",
+            timeout=DEFAULT_TIMEOUT,
+        )
+        if r.ok:
+            data = r.json()
+            logger.info(f"Cleared {data['deleted']} jobs from project {project.id}")
+            return data["deleted"]
+        logger.error(f"Failed to clear queue: HTTP {r.status_code}")
+        return 0
+
+    def extend_queue(self, project: Project, jobs: List[Job]) -> List[int]:
+        """Add multiple jobs to a project's queue.
+
+        Args:
+            project: The project to add jobs to.
+            jobs: List of Job objects to add.
+
+        Returns:
+            List of created job IDs.
+        """
+        # Get task IDs for each job
+        job_items = []
+        for job in jobs:
+            r = requests.get(
+                f"{self.base_url}/tasks/name/{job.task}",
+                params={"project_id": project.id},
+                timeout=DEFAULT_TIMEOUT,
+            )
+            if not r.ok:
+                logger.error(f"Task '{job.task}' not found for project")
+                continue
+            task_id = r.json()["id"]
+            job_items.append(
+                {
+                    "name": job.name,
+                    "task_id": task_id,
+                    "parameters": job.parameters,
+                    "priority": job.priority,
+                    "depends": {},
+                }
+            )
+
+        if not job_items:
+            return []
+
+        r = requests.post(
+            f"{self.base_url}/projects/{project.id}/jobs/batch",
+            json={"jobs": job_items},
+            timeout=DEFAULT_TIMEOUT,
+        )
+        if r.status_code == 201:
+            data = r.json()
+            logger.info(f"Added {data['created']} jobs to project {project.id}")
+            return data["job_ids"]
+        logger.error(f"Failed to add jobs: HTTP {r.status_code}")
+        return []

@@ -10,58 +10,59 @@ Issues found during code review that cause runtime errors, security vulnerabilit
 
 ### Security Vulnerabilities
 
-| Severity | File | Line | Issue |
-|----------|------|------|-------|
-| **CRITICAL** | `client/job.py` | 48-49 | Command injection via `os.system(command)` - user parameters passed directly to shell |
-| **HIGH** | `server/database.py` | 8 | Database password in plaintext URL string |
-| **MEDIUM** | `server/routers/jobs.py` | 65 | Debug `print()` exposes data to logs |
-| **MEDIUM** | `client/server.py` | 141 | No timeout on HTTP requests (can hang forever) |
+| Severity | File | Line | Issue | Status |
+|----------|------|------|-------|--------|
+| **CRITICAL** | `client/job.py` | 48-49 | Command injection via `os.system(command)` - user parameters passed directly to shell | ✅ Fixed - uses `subprocess.run(shell=False)` |
+| **HIGH** | `server/database.py` | 8 | Database password in plaintext URL string | ✅ Fixed - uses environment variables via pydantic-settings |
+| **MEDIUM** | `server/routers/jobs.py` | 65 | Debug `print()` exposes data to logs | ✅ Fixed - removed |
+| **MEDIUM** | `client/server.py` | 141 | No timeout on HTTP requests (can hang forever) | ✅ Fixed - all requests have `DEFAULT_TIMEOUT` |
 
 ### Runtime Errors (Code Will Crash)
 
-| File | Line | Issue |
-|------|------|-------|
-| `server/routers/projects.py` | 79 | Parameter named `str` (Python builtin) instead of `id` |
-| `server/routers/tasks.py` | 43 | References undefined variable `id` in error message |
-| `client/task.py` | 8 | Missing import for `random_string()` |
-| `client/project.py` | 56-57 | Property `queue` doesn't return value |
-| `server/routers/projects.py` | 96-100 | Response dict keys don't match schema |
+| File | Line | Issue | Status |
+|------|------|-------|--------|
+| `server/routers/projects.py` | 79 | Parameter named `str` (Python builtin) instead of `id` | ✅ Fixed |
+| `server/routers/tasks.py` | 43 | References undefined variable `id` in error message | ✅ Fixed |
+| `client/task.py` | 8 | Missing import for `random_string()` | ✅ Fixed |
+| `client/project.py` | 56-57 | Property `queue` doesn't return value | ✅ Fixed |
+| `server/routers/projects.py` | 96-100 | Response dict keys don't match schema | ✅ Fixed |
 
 ### Type Errors
 
-| File | Line | Issue |
-|------|------|-------|
-| `client/client.py` | 28 | Type mismatch: `accelerator: List[int]` but `Resource` expects `List[str]` |
-| `server/schemas.py` | 19 | Mutable default `depends: Dict = {}` shared across instances |
-| `client/job.py` | 17 | Type hint says `List[Any]` but comment says "replaced by Job" |
+| File | Line | Issue | Status |
+|------|------|-------|--------|
+| `client/client.py` | 28 | Type mismatch: `accelerator: List[int]` but `Resource` expects `List[str]` | ✅ Fixed |
+| `server/schemas.py` | 19 | Mutable default `depends: Dict = {}` shared across instances | ✅ Fixed - uses `Field(default_factory=dict)` |
+| `client/job.py` | 17 | Type hint says `List[Any]` but comment says "replaced by Job" | ✅ Fixed |
+| `server/validate_in_db.py` | 16 | `task_id` parameter type `str` should be `int` | ✅ Fixed |
 
 ### API Design Violations
 
-| File | Line | Issue |
-|------|------|-------|
-| `server/routers/jobs.py` | 13-16 | Non-RESTful `/jobs/all` endpoint (redundant) |
-| `server/routers/projects.py` | 26, 71, 82, 91 | Wrong resource names in error messages ("Job" instead of "Project") |
-| `server/routers/tasks.py` | 35, 43 | Error messages say "Project" when getting tasks |
+| File | Line | Issue | Status |
+|------|------|-------|--------|
+| `server/routers/jobs.py` | 13-16 | Non-RESTful `/jobs/all` endpoint (redundant) | ✅ Removed |
+| `server/routers/projects.py` | 26, 71, 82, 91 | Wrong resource names in error messages ("Job" instead of "Project") | ✅ Fixed |
+| `server/routers/tasks.py` | 35, 43 | Error messages say "Project" when getting tasks | ✅ Fixed |
 
 ### Dead Code & Cruft
 
-| File | Line | Issue |
-|------|------|-------|
-| `client/server.py` | 14-15 | Global mutable state `dummy_projects`, `dummy_jobs` |
-| `client/server.py` | 32-95 | Large commented-out code blocks |
-| `client/learn_requests.py` | 1-12 | Test/example code in production |
-| `client/client.py` | 36-40 | Empty `append_artifact()`, `extend_artifacts()` methods |
-| `server/routers/jobs.py` | 30-34 | Commented-out code block |
-| `server/routers/tasks.py` | 59-61 | Empty `update_task()` endpoint |
+| File | Line | Issue | Status |
+|------|------|-------|--------|
+| `client/server.py` | 14-15 | Global mutable state `dummy_projects`, `dummy_jobs` | ✅ Removed |
+| `client/server.py` | 32-95 | Large commented-out code blocks | ✅ Removed |
+| `client/learn_requests.py` | 1-12 | Test/example code in production | ✅ Deleted |
+| `client/client.py` | 36-40 | Empty `append_artifact()`, `extend_artifacts()` methods | ✅ Removed |
+| `server/routers/jobs.py` | 30-34 | Commented-out code block | ✅ Removed |
+| `server/routers/tasks.py` | 59-61 | Empty `update_task()` endpoint | ✅ Implemented |
 
 ### Architecture Issues
 
-| File | Issue |
-|------|-------|
-| `client/job.py` | `Job.run()` mixes data object with execution logic - violates SRP |
-| `client/project.py` | Thin wrapper delegating everything to `_server` - no domain logic |
-| `client/server.py` | `ProjectConnector` mixes dummy data with HTTP calls inconsistently |
-| `client/client.py` | Mixes resource management, artifacts, and formatting - unclear purpose |
+| File | Issue | Status |
+|------|-------|--------|
+| `client/job.py` | `Job.run()` mixes data object with execution logic - violates SRP | ✅ Fixed - uses Formatter for execution |
+| `client/project.py` | Thin wrapper delegating everything to `_server` - no domain logic | ✅ Acceptable pattern for stateless client |
+| `client/server.py` | `ProjectConnector` mixes dummy data with HTTP calls inconsistently | ✅ Fixed - clean HTTP-only implementation |
+| `client/client.py` | Mixes resource management, artifacts, and formatting - unclear purpose | ✅ Clarified - focused on worker functionality |
 
 ---
 
@@ -69,66 +70,65 @@ Issues found during code review that cause runtime errors, security vulnerabilit
 
 | Feature | Vision | Current State | Gap |
 |---------|--------|---------------|-----|
-| Stateless client | All state on server | ✅ Design correct, but `dummy_projects`/`dummy_jobs` cruft remains | Cleanup needed |
-| Formatter system | Convert params → commands | ❌ Empty stub classes | Full implementation needed |
-| Worker loop | `client.work()` pulls continuously | ❌ Not implemented | New feature |
+| Stateless client | All state on server | ✅ Design correct, clean implementation | Done |
+| Formatter system | Convert params → commands | ✅ CLIFormatter, SlurmFormatter, RUNAIFormatter implemented | Done |
+| Worker loop | `client.work()` pulls continuously | ✅ Implemented with signal handling | Done |
 | Priority queuing | Higher priority first | ✅ Working | Done |
 | Job dependencies | Jobs wait for dependencies | ⚠️ `depends` field exists, not enforced | Server-side logic needed |
-| Resource tracking | CPU/GPU allocation | ⚠️ Classes exist, not functional | Implementation needed |
+| Resource tracking | CPU/GPU allocation | ⚠️ Classes exist, basic tracking | Enhanced implementation needed |
 | Artifact management | Track job I/O | ❌ Stub only | Future phase |
-| Queue operations | pop, extend, clear | ❌ Return "Not implemented" | Implementation needed |
+| Queue operations | pop, extend, clear | ✅ Implemented | Done |
 | Security | Auth, CORS | ❌ None | Future phase |
 | Tests | Comprehensive coverage | ❌ Mostly stubs | Ongoing |
 
 ---
 
-## Phase 0: Critical Fixes (Blockers)
+## Phase 0: Critical Fixes (Blockers) ✅ COMPLETE
 
 Fix issues that cause crashes or security vulnerabilities.
 
 ### 0.1 Security fixes
-- [ ] Replace `os.system()` with `subprocess.run(shell=False)` in `client/job.py`
-- [ ] Move database credentials to environment variables in `server/database.py`
-- [ ] Add timeout to all `requests.*()` calls in `client/server.py`
-- [ ] Remove debug `print()` statements from routers
+- [x] Replace `os.system()` with `subprocess.run(shell=False)` in `client/job.py`
+- [x] Move database credentials to environment variables in `server/database.py`
+- [x] Add timeout to all `requests.*()` calls in `client/server.py`
+- [x] Remove debug `print()` statements from routers
 
 ### 0.2 Runtime error fixes
-- [ ] Fix parameter `str` → `id` in `server/routers/projects.py:79`
-- [ ] Fix undefined `id` variable in `server/routers/tasks.py:43`
-- [ ] Add missing import in `client/task.py`
-- [ ] Add return statement to `queue` property in `client/project.py`
-- [ ] Fix response dict keys in `server/routers/projects.py:100`
+- [x] Fix parameter `str` → `id` in `server/routers/projects.py:79`
+- [x] Fix undefined `id` variable in `server/routers/tasks.py:43`
+- [x] Add missing import in `client/task.py`
+- [x] Add return statement to `queue` property in `client/project.py`
+- [x] Fix response dict keys in `server/routers/projects.py:100`
 
 ### 0.3 Type fixes
-- [ ] Fix `accelerator` type in `client/client.py`
-- [ ] Fix mutable default `depends={}` in `server/schemas.py`
+- [x] Fix `accelerator` type in `client/client.py`
+- [x] Fix mutable default `depends={}` in `server/schemas.py`
 
 ---
 
-## Phase 1: Cleanup
+## Phase 1: Cleanup ✅ COMPLETE
 
 Remove legacy code and establish clean foundation.
 
 ### 1.1 Remove dead code
-- [ ] Delete `dummy_projects = {}` and `dummy_jobs = {}` from `client/server.py`
-- [ ] Delete `client/learn_requests.py` (test code in production)
-- [ ] Remove all commented-out code blocks
-- [ ] Remove empty stub methods (`append_artifact`, `extend_artifacts`)
-- [ ] Remove or implement empty `update_task()` endpoint
+- [x] Delete `dummy_projects = {}` and `dummy_jobs = {}` from `client/server.py`
+- [x] Delete `client/learn_requests.py` (test code in production)
+- [x] Remove all commented-out code blocks
+- [x] Remove empty stub methods (`append_artifact`, `extend_artifacts`)
+- [x] Remove or implement empty `update_task()` endpoint
 
 ### 1.2 Fix API error messages
-- [ ] Fix all "Job with" → "Project with" in `server/routers/projects.py`
-- [ ] Fix all "Project with" → "Task with" in `server/routers/tasks.py`
-- [ ] Remove redundant `/jobs/all` endpoint
+- [x] Fix all "Job with" → "Project with" in `server/routers/projects.py`
+- [x] Fix all "Project with" → "Task with" in `server/routers/tasks.py`
+- [x] Remove redundant `/jobs/all` endpoint
 
 ### 1.3 Simplify ProjectConnector
-- [ ] Remove all dummy data references
-- [ ] Make all methods use HTTP calls consistently
-- [ ] Or: Remove `ProjectConnector` entirely and inline into `Server` class
+- [x] Remove all dummy data references
+- [x] Make all methods use HTTP calls consistently
 
 ---
 
-## Phase 2: Formatter System
+## Phase 2: Formatter System ✅ COMPLETE
 
 Implement the runtime-agnostic job execution.
 
@@ -136,73 +136,66 @@ Implement the runtime-agnostic job execution.
 ```python
 class Formatter(ABC):
     @abstractmethod
-    def format(self, task: str, parameters: Dict[str, Any]) -> str:
-        """Convert job parameters to executable command string."""
+    def format(self, task: str, parameters: Dict[str, Any]) -> List[str]:
+        """Convert job parameters to executable command."""
         pass
 
     @abstractmethod
-    def execute(self, command: str) -> int:
-        """Execute the formatted command. Returns exit code."""
+    def execute(self, command: List[str]) -> subprocess.CompletedProcess:
+        """Execute the formatted command. Returns CompletedProcess."""
         pass
 ```
 
 ### 2.2 Implement formatters
-- [ ] `CLIFormatter`: Direct shell command execution
-- [ ] `SlurmFormatter`: Generate and submit sbatch scripts
-- [ ] `RUNAIFormatter`: Generate RUNAI job submissions
-- [ ] `PythonFormatter`: Call Python functions directly (optional)
+- [x] `CLIFormatter`: Direct shell command execution
+- [x] `SlurmFormatter`: Generate and submit sbatch scripts
+- [x] `RUNAIFormatter`: Generate RUNAI job submissions
+- [ ] `PythonFormatter`: Call Python functions directly (optional - future)
 
 ### 2.3 Template system
-- [ ] Define command templates per task (e.g., `"python train.py --lr {lr} --epochs {epochs}"`)
-- [ ] Store templates in Task model or client-side config
-- [ ] Parameter substitution with validation
+- [x] Define command templates per task (e.g., `"python train.py --lr {lr} --epochs {epochs}"`)
+- [x] Parameter substitution with validation
 
 ---
 
-## Phase 3: Worker Loop
+## Phase 3: Worker Loop ✅ COMPLETE
 
 Enable continuous job pulling.
 
 ### 3.1 Implement `Client.work()` method
 ```python
-def work(self, project: str, poll_interval: float = 5.0) -> None:
+def work(self, resource: Optional[Resource] = None, poll_interval: float = 5.0, run_forever: bool = False) -> int:
     """Continuously fetch and execute jobs until queue is empty."""
-    while True:
-        try:
-            job = self.fetch_job(project)
-            job.run(self.resource)
-        except EmptyQueueError:
-            break  # or sleep and retry
 ```
 
 ### 3.2 Features
-- [ ] Configurable poll interval for waiting on new jobs
-- [ ] Graceful shutdown on SIGINT/SIGTERM
-- [ ] Option to run forever vs exit on empty queue
-- [ ] Logging of job execution
+- [x] Configurable poll interval for waiting on new jobs
+- [x] Graceful shutdown on SIGINT/SIGTERM
+- [x] Option to run forever vs exit on empty queue
+- [x] Logging of job execution
 
 ### 3.3 Update `Job.run()`
-- [ ] Use formatter from client/resource
-- [ ] Proper subprocess handling (not `os.system`)
-- [ ] Capture stdout/stderr
-- [ ] Report execution time to server
+- [x] Use formatter from client/resource
+- [x] Proper subprocess handling (not `os.system`)
+- [x] Capture stdout/stderr
+- [ ] Report execution time to server (future enhancement)
 
 ---
 
-## Phase 4: Queue Operations
+## Phase 4: Queue Operations ✅ COMPLETE
 
 Complete the queue management API.
 
 ### 4.1 Server endpoints
-- [ ] `DELETE /projects/{id}/jobs/{job_id}` - Remove specific job
-- [ ] `DELETE /projects/{id}/queue` - Clear all pending jobs
-- [ ] `POST /projects/{id}/jobs/batch` - Add multiple jobs
+- [x] `DELETE /projects/{id}/jobs/{job_id}` - Remove specific job
+- [x] `DELETE /projects/{id}/queue` - Clear all pending jobs
+- [x] `POST /projects/{id}/jobs/batch` - Add multiple jobs
 
 ### 4.2 Client methods
-- [ ] `pop_queue(idx)` → Remove job by index
-- [ ] `extend_queue(jobs)` → Add multiple jobs
-- [ ] `remove_queue(job)` → Remove specific job
-- [ ] `clear_queue()` → Clear all pending jobs
+- [x] `pop_queue(idx)` → Remove job by index
+- [x] `extend_queue(jobs)` → Add multiple jobs
+- [x] `remove_job(job_id)` → Remove specific job
+- [x] `clear_queue()` → Clear all pending jobs
 
 ---
 
@@ -285,11 +278,19 @@ For external/public-facing servers.
 
 ---
 
-## Immediate Next Steps
+## Implementation Summary
 
-1. **Phase 0**: Fix all critical/blocking issues first
-2. **Phase 1**: Clean up dead code and cruft
-3. **Phase 2**: Implement CLIFormatter as MVP
-4. **Phase 3**: Basic worker loop
+**Completed Phases:**
+- Phase 0: Critical Fixes ✅
+- Phase 1: Cleanup ✅
+- Phase 2: Formatter System ✅
+- Phase 3: Worker Loop ✅
+- Phase 4: Queue Operations ✅
 
-This gets a minimal working system where a client can continuously pull and execute jobs.
+**Next Steps:**
+1. **Phase 5**: Implement job dependency enforcement
+2. **Phase 6**: Enhanced resource management
+3. **Phase 7**: Write tests and documentation
+4. **Phase 8**: Add authentication and security features
+
+The system now has a minimal working implementation where a client can continuously pull and execute jobs with proper formatting, queue management, and graceful shutdown.

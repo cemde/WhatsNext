@@ -13,7 +13,7 @@ def validate_project_exists(db: Session, project_id: int) -> models.Project:
 
 
 # validate that task exists in project
-def validate_task_in_project_exists(db: Session, task_id: str, project_id: int) -> models.Task:
+def validate_task_in_project_exists(db: Session, task_id: int, project_id: int) -> models.Task:
     task = db.query(models.Task).filter(models.Task.id == task_id).first()
     if task is None or task.project_id != project_id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Task {task_id=} not found for project id {project_id}.")

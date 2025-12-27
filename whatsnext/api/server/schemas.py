@@ -1,9 +1,9 @@
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field
 
-from .models import DEFAULT_JOB_STATUS, DEFAULT_PROJECT_STATUS
+from ..shared.status import DEFAULT_JOB_STATUS, DEFAULT_PROJECT_STATUS
 
 
 class JobBase(BaseModel):
@@ -14,7 +14,7 @@ class JobBase(BaseModel):
 
 
 class JobCreate(JobBase):
-    status: str = DEFAULT_JOB_STATUS
+    status: str = DEFAULT_JOB_STATUS.value
     priority: int = 0
     depends: Dict[str, Any] = Field(default_factory=dict)
 
@@ -52,6 +52,27 @@ class JobAndCountResponse(BaseModel):
         from_attributes = True
 
 
+class JobBatchItem(BaseModel):
+    name: str
+    task_id: int
+    parameters: Dict[str, Any]
+    priority: int = 0
+    depends: Dict[str, Any] = Field(default_factory=dict)
+
+
+class JobBatchCreate(BaseModel):
+    jobs: List[JobBatchItem]
+
+
+class JobBatchResponse(BaseModel):
+    created: int
+    job_ids: List[int]
+
+
+class QueueClearResponse(BaseModel):
+    deleted: int
+
+
 class ProjectBase(BaseModel):
     name: str
     description: str
@@ -59,7 +80,7 @@ class ProjectBase(BaseModel):
 
 
 class ProjectCreate(ProjectBase):
-    status: str = DEFAULT_PROJECT_STATUS
+    status: str = DEFAULT_PROJECT_STATUS.value
     description: str = ""
 
 

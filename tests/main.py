@@ -60,8 +60,8 @@ class TrainCLIFormatter:
 formatter = TrainCLIFormatter("python3", "tests/train.py")
 
 client = wn.Client("usernamee", "ClusterA", "", project, formatter)
-resource = client.allocate_resource(cpu=-1, accelerator=[0, 1])
-resource2 = client.allocate_resource(cpu=-1, accelerator=[2, 3])
+resource = client.allocate_resource(cpu=-1, accelerator=["0", "1"])
+resource2 = client.allocate_resource(cpu=-1, accelerator=["2", "3"])
 
 while resource.active():
     try:

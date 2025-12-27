@@ -1,3 +1,1 @@
-
-
-def 
+# Placeholder for database tests

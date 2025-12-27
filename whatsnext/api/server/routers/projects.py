@@ -98,3 +98,55 @@ def fetch_job(id: int, db: Session = Depends(get_db)):
     db.refresh(job)
     job.task_name = task_name
     return {"job": job, "num_pending": job_count}
+
+
+@router.delete("/{project_id}/jobs/{job_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_project_job(project_id: int, job_id: int, db: Session = Depends(get_db)):
+    """Remove a specific job from a project's queue."""
+    job = db.query(models.Job).filter(models.Job.id == job_id, models.Job.project_id == project_id).first()
+    if job is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Job with id {job_id} not found in project {project_id}.")
+    db.delete(job)
+    db.commit()
+
+
+@router.delete("/{id}/queue", response_model=schemas.QueueClearResponse)
+def clear_project_queue(id: int, db: Session = Depends(get_db)):
+    """Clear all pending jobs from a project's queue."""
+    project = db.query(models.Project).filter(models.Project.id == id).first()
+    if project is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project with id {id} not found.")
+
+    deleted_count = (
+        db.query(models.Job)
+        .filter(models.Job.project_id == id, models.Job.status == models.JobStatus.PENDING)
+        .delete(synchronize_session=False)
+    )
+    db.commit()
+    return {"deleted": deleted_count}
+
+
+@router.post("/{id}/jobs/batch", status_code=status.HTTP_201_CREATED, response_model=schemas.JobBatchResponse)
+def add_jobs_batch(id: int, batch: schemas.JobBatchCreate, db: Session = Depends(get_db)):
+    """Add multiple jobs to a project's queue in a single request."""
+    project = db.query(models.Project).filter(models.Project.id == id).first()
+    if project is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project with id {id} not found.")
+
+    created_ids = []
+    for job_item in batch.jobs:
+        new_job = models.Job(
+            name=job_item.name,
+            project_id=id,
+            task_id=job_item.task_id,
+            parameters=job_item.parameters,
+            priority=job_item.priority,
+            depends=job_item.depends,
+            status=models.JobStatus.PENDING,
+        )
+        db.add(new_job)
+        db.flush()  # Flush to get the ID
+        created_ids.append(new_job.id)
+
+    db.commit()
+    return {"created": len(created_ids), "job_ids": created_ids}
