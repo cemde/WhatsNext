@@ -1,9 +1,7 @@
-from typing import List
-
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import HTTPException, status
 from sqlalchemy.orm import Session
 
-from . import models, schemas
+from . import models
 
 
 # validate that project exists

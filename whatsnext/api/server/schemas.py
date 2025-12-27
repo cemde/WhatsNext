@@ -1,7 +1,7 @@
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from .models import DEFAULT_JOB_STATUS, DEFAULT_PROJECT_STATUS
 
@@ -16,7 +16,7 @@ class JobBase(BaseModel):
 class JobCreate(JobBase):
     status: str = DEFAULT_JOB_STATUS
     priority: int = 0
-    depends: Dict[str, Any] = {}
+    depends: Dict[str, Any] = Field(default_factory=dict)
 
 
 class JobUpdate(JobBase):
@@ -45,7 +45,7 @@ class JobWithTaskNameResponse(JobBase):
 
 
 class JobAndCountResponse(BaseModel):
-    job: JobWithTaskNameResponse
+    job: Optional[JobWithTaskNameResponse] = None
     num_pending: int
 
     class Config:

@@ -1,12 +1,21 @@
 from datetime import datetime
-from typing import List
+from typing import TYPE_CHECKING, List
 
 from .formatter import Formatter
 from .resource import Resource
 from .utils import random_string
 
+if TYPE_CHECKING:
+    from .project import Project
+
 
 class Client:
+    """Represents a worker client that executes jobs.
+
+    A Client manages resources (CPU/GPU) and uses a formatter to convert
+    job parameters into executable commands.
+    """
+
     def __init__(
         self,
         entity: str,
@@ -23,18 +32,22 @@ class Client:
         self.created_at = datetime.now()
         self.updated_at = datetime.now()
         self.formatter = formatter
-        self.active_resources = []
+        self.active_resources: List[Resource] = []
 
-    def allocate_resource(self, cpu: int, accelerator: List[int]) -> "Resource":
+    def allocate_resource(self, cpu: int, accelerator: List[str]) -> Resource:
+        """Allocate a resource for job execution.
+
+        Args:
+            cpu: Number of CPUs to allocate.
+            accelerator: List of accelerator device IDs (e.g., ["0", "1"] for GPUs).
+
+        Returns:
+            The allocated Resource.
+        """
         resource = Resource(cpu, accelerator, self)
         self.active_resources.append(resource)
         return resource
 
-    def free_resource(self, resource: "Resource") -> None:
+    def free_resource(self, resource: Resource) -> None:
+        """Release a previously allocated resource."""
         self.active_resources.remove(resource)
-
-    def append_artifact(self, artifact: "Artifact"):
-        pass
-
-    def extend_artifacts(self, artifacts: List["Artifact"]):
-        pass

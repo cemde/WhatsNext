@@ -3,7 +3,7 @@ from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import JSON, TIMESTAMP
 from sqlalchemy.schema import UniqueConstraint
 
-from ..shared.status import JobStatus, ProjectStatus, DEFAULT_PROJECT_STATUS, DEFAULT_JOB_STATUS
+from ..shared.status import JobStatus, ProjectStatus, DEFAULT_PROJECT_STATUS
 
 from .database import Base
 

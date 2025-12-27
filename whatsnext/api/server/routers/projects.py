@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -9,17 +9,11 @@ from ..database import get_db
 router = APIRouter(prefix="/projects", tags=["Projects"])
 
 
-@router.get("/all", response_model=List[schemas.ProjectResponse])
-def get_all_projects(db: Session = Depends(get_db)):
-    projects = db.query(models.Project).all()
-    return projects
-
-
 @router.get("/{id}", response_model=schemas.ProjectResponse)
 def get_project(id: int, db: Session = Depends(get_db)):
     project = db.query(models.Project).filter(models.Project.id == id).first()
     if not project:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project with {id=} not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project with id {id} not found.")
     return project
 
 
@@ -27,7 +21,7 @@ def get_project(id: int, db: Session = Depends(get_db)):
 def get_project_by_name(name: str, db: Session = Depends(get_db)):
     project = db.query(models.Project).filter(models.Project.name == name).first()
     if not project:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project with {id=} not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project with name '{name}' not found.")
     return project
 
 
@@ -36,21 +30,15 @@ def get_projects(
     db: Session = Depends(get_db),
     limit: int = 10,
     skip: int = 0,
-    status: str = "ACTIVE",
-    # search: Optional[str] = "Inventing AGI",
+    status_filter: Optional[str] = "ACTIVE",
 ):
-    # Validate status # TODO move validation to pydantic schema
-    if status not in models.ProjectStatus.__members__:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid status {status=}")
+    if status_filter and status_filter not in models.ProjectStatus.__members__:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Invalid status '{status_filter}'")
 
-    projects = (
-        db.query(models.Project)
-        .filter(models.Project.status == status)
-        # .filter(models.Project.name.ilike(f"%{search}%"))
-        .limit(limit)
-        .offset(skip)
-        .all()
-    )
+    query = db.query(models.Project)
+    if status_filter:
+        query = query.filter(models.Project.status == status_filter)
+    projects = query.limit(limit).offset(skip).all()
     return projects
 
 
@@ -63,23 +51,22 @@ def add_project(project: schemas.ProjectCreate, db: Session = Depends(get_db)):
     return new_project
 
 
-@router.put("/{id}")
+@router.put("/{id}", status_code=status.HTTP_200_OK)
 def update_project(id: int, project: schemas.ProjectUpdate, db: Session = Depends(get_db)):
     project_query = db.query(models.Project).filter(models.Project.id == id)
     old_project = project_query.first()
     if old_project is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Job with {id=} not found.")
-    print(project.model_dump())
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project with id {id} not found.")
     project_query.update(project.model_dump(), synchronize_session=False)
     db.commit()
     return {"data": project_query.first()}
 
 
 @router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_project(str, db: Session = Depends(get_db)):
+def delete_project(id: int, db: Session = Depends(get_db)):
     project = db.query(models.Project).filter(models.Project.id == id)
     if project.first() is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Job with {id=} not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project with id {id} not found.")
     project.delete(synchronize_session=False)
     db.commit()
 
@@ -88,7 +75,7 @@ def delete_project(str, db: Session = Depends(get_db)):
 def delete_project_by_name(name: str, db: Session = Depends(get_db)):
     project = db.query(models.Project).filter(models.Project.name == name)
     if project.first() is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Job with {id=} not found.")
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Project with name '{name}' not found.")
     project.delete(synchronize_session=False)
     db.commit()
 
@@ -97,7 +84,7 @@ def delete_project_by_name(name: str, db: Session = Depends(get_db)):
 def fetch_job(id: int, db: Session = Depends(get_db)):
     job_count = db.query(models.Job).filter(models.Job.project_id == id).filter(models.Job.status == models.JobStatus.PENDING).count()
     if job_count == 0:
-        return {"count": 0, "data": None}
+        return {"job": None, "num_pending": 0}
     job, task_name = (
         db.query(models.Job, models.Task.name)
         .join(models.Task, models.Job.task_id == models.Task.id, isouter=True)
@@ -109,8 +96,5 @@ def fetch_job(id: int, db: Session = Depends(get_db)):
     db.query(models.Job).filter(models.Job.id == job.id).update({"status": models.JobStatus.QUEUED}, synchronize_session=False)
     db.commit()
     db.refresh(job)
-    # job.task_id = None
     job.task_name = task_name
-    # if job.first() is None:
-    #     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Job with {id=} not found.")
     return {"job": job, "num_pending": job_count}

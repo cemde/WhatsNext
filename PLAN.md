@@ -2,6 +2,69 @@
 
 This document compares the current state to the vision and outlines the path forward.
 
+---
+
+## Critical Issues (Must Fix First)
+
+Issues found during code review that cause runtime errors, security vulnerabilities, or violate best practices.
+
+### Security Vulnerabilities
+
+| Severity | File | Line | Issue |
+|----------|------|------|-------|
+| **CRITICAL** | `client/job.py` | 48-49 | Command injection via `os.system(command)` - user parameters passed directly to shell |
+| **HIGH** | `server/database.py` | 8 | Database password in plaintext URL string |
+| **MEDIUM** | `server/routers/jobs.py` | 65 | Debug `print()` exposes data to logs |
+| **MEDIUM** | `client/server.py` | 141 | No timeout on HTTP requests (can hang forever) |
+
+### Runtime Errors (Code Will Crash)
+
+| File | Line | Issue |
+|------|------|-------|
+| `server/routers/projects.py` | 79 | Parameter named `str` (Python builtin) instead of `id` |
+| `server/routers/tasks.py` | 43 | References undefined variable `id` in error message |
+| `client/task.py` | 8 | Missing import for `random_string()` |
+| `client/project.py` | 56-57 | Property `queue` doesn't return value |
+| `server/routers/projects.py` | 96-100 | Response dict keys don't match schema |
+
+### Type Errors
+
+| File | Line | Issue |
+|------|------|-------|
+| `client/client.py` | 28 | Type mismatch: `accelerator: List[int]` but `Resource` expects `List[str]` |
+| `server/schemas.py` | 19 | Mutable default `depends: Dict = {}` shared across instances |
+| `client/job.py` | 17 | Type hint says `List[Any]` but comment says "replaced by Job" |
+
+### API Design Violations
+
+| File | Line | Issue |
+|------|------|-------|
+| `server/routers/jobs.py` | 13-16 | Non-RESTful `/jobs/all` endpoint (redundant) |
+| `server/routers/projects.py` | 26, 71, 82, 91 | Wrong resource names in error messages ("Job" instead of "Project") |
+| `server/routers/tasks.py` | 35, 43 | Error messages say "Project" when getting tasks |
+
+### Dead Code & Cruft
+
+| File | Line | Issue |
+|------|------|-------|
+| `client/server.py` | 14-15 | Global mutable state `dummy_projects`, `dummy_jobs` |
+| `client/server.py` | 32-95 | Large commented-out code blocks |
+| `client/learn_requests.py` | 1-12 | Test/example code in production |
+| `client/client.py` | 36-40 | Empty `append_artifact()`, `extend_artifacts()` methods |
+| `server/routers/jobs.py` | 30-34 | Commented-out code block |
+| `server/routers/tasks.py` | 59-61 | Empty `update_task()` endpoint |
+
+### Architecture Issues
+
+| File | Issue |
+|------|-------|
+| `client/job.py` | `Job.run()` mixes data object with execution logic - violates SRP |
+| `client/project.py` | Thin wrapper delegating everything to `_server` - no domain logic |
+| `client/server.py` | `ProjectConnector` mixes dummy data with HTTP calls inconsistently |
+| `client/client.py` | Mixes resource management, artifacts, and formatting - unclear purpose |
+
+---
+
 ## Status Quo vs Vision
 
 | Feature | Vision | Current State | Gap |
@@ -19,27 +82,49 @@ This document compares the current state to the vision and outlines the path for
 
 ---
 
+## Phase 0: Critical Fixes (Blockers)
+
+Fix issues that cause crashes or security vulnerabilities.
+
+### 0.1 Security fixes
+- [ ] Replace `os.system()` with `subprocess.run(shell=False)` in `client/job.py`
+- [ ] Move database credentials to environment variables in `server/database.py`
+- [ ] Add timeout to all `requests.*()` calls in `client/server.py`
+- [ ] Remove debug `print()` statements from routers
+
+### 0.2 Runtime error fixes
+- [ ] Fix parameter `str` → `id` in `server/routers/projects.py:79`
+- [ ] Fix undefined `id` variable in `server/routers/tasks.py:43`
+- [ ] Add missing import in `client/task.py`
+- [ ] Add return statement to `queue` property in `client/project.py`
+- [ ] Fix response dict keys in `server/routers/projects.py:100`
+
+### 0.3 Type fixes
+- [ ] Fix `accelerator` type in `client/client.py`
+- [ ] Fix mutable default `depends={}` in `server/schemas.py`
+
+---
+
 ## Phase 1: Cleanup
 
 Remove legacy code and establish clean foundation.
 
-### 1.1 Remove dummy data stores
+### 1.1 Remove dead code
 - [ ] Delete `dummy_projects = {}` and `dummy_jobs = {}` from `client/server.py`
-- [ ] Remove all references to dummy stores in `ProjectConnector`
-- [ ] Update `get_queue()` to use HTTP call instead of dummy data
+- [ ] Delete `client/learn_requests.py` (test code in production)
+- [ ] Remove all commented-out code blocks
+- [ ] Remove empty stub methods (`append_artifact`, `extend_artifacts`)
+- [ ] Remove or implement empty `update_task()` endpoint
 
-### 1.2 Fix incomplete HTTP implementations
-- [ ] `ProjectConnector.get_last_updated()` → HTTP call
-- [ ] `ProjectConnector.get_description()` → HTTP call
-- [ ] `ProjectConnector.get_status()` → HTTP call
-- [ ] `ProjectConnector.get_created_at()` → HTTP call
-- [ ] `ProjectConnector.set_name()` → HTTP call
-- [ ] `ProjectConnector.set_status()` → HTTP call
+### 1.2 Fix API error messages
+- [ ] Fix all "Job with" → "Project with" in `server/routers/projects.py`
+- [ ] Fix all "Project with" → "Task with" in `server/routers/tasks.py`
+- [ ] Remove redundant `/jobs/all` endpoint
 
-### 1.3 Code quality fixes
-- [ ] Fix typo in `server/routers/projects.py:79` (`delete_project(str, ...)`)
-- [ ] Consistent error handling across all HTTP calls
-- [ ] Remove commented-out code blocks
+### 1.3 Simplify ProjectConnector
+- [ ] Remove all dummy data references
+- [ ] Make all methods use HTTP calls consistently
+- [ ] Or: Remove `ProjectConnector` entirely and inline into `Server` class
 
 ---
 
@@ -179,9 +264,9 @@ Track and enforce resource allocation.
 
 ## Immediate Next Steps
 
-1. **Phase 1.1**: Remove dummy data stores (30 min)
-2. **Phase 1.2**: Fix HTTP implementations (1-2 hours)
-3. **Phase 2.1-2.2**: Implement CLIFormatter as MVP (2-3 hours)
-4. **Phase 3.1**: Basic worker loop (1-2 hours)
+1. **Phase 0**: Fix all critical/blocking issues first
+2. **Phase 1**: Clean up dead code and cruft
+3. **Phase 2**: Implement CLIFormatter as MVP
+4. **Phase 3**: Basic worker loop
 
 This gets a minimal working system where a client can continuously pull and execute jobs.

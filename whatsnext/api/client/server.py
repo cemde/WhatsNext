@@ -1,115 +1,230 @@
 from __future__ import annotations
 
+import logging
 from datetime import datetime
-from typing import Any, List
-
-from .exceptions import EmptyQueueError
-from .project import Project
-from .utils import random_string
+from typing import Any, Dict, List, Optional
 
 import requests
+from requests.exceptions import ConnectionError, Timeout
 from tabulate import tabulate
 
-# dummy server
-dummy_projects = {}
-dummy_jobs = {}
+from .exceptions import EmptyQueueError
+from .job import Job
+from .project import Project
+
+logger = logging.getLogger(__name__)
+
+# Default timeout for HTTP requests (seconds)
+DEFAULT_TIMEOUT = 30
 
 
 class ProjectConnector:
+    """Handles project-related HTTP requests to the server."""
+
     def __init__(self, server: Server) -> None:
         self._server = server
 
-    def get_last_updated(self, project) -> datetime:
-        return dummy_projects[project.id]["last_updated"]
+    def _get_project_data(self, project) -> Dict[str, Any]:
+        """Fetch full project data from server."""
+        r = requests.get(
+            f"{self._server.base_url}/projects/{project.id}",
+            timeout=DEFAULT_TIMEOUT,
+        )
+        r.raise_for_status()
+        return r.json()
 
-    def set_last_updated(self, project, time: datetime = None) -> datetime:
-        if time is None:
-            time = datetime.now()
-        dummy_projects[project.id]["last_updated"] = time
+    def get_last_updated(self, project) -> datetime:
+        data = self._get_project_data(project)
+        return datetime.fromisoformat(data["updated_at"])
 
     def get_name(self, project) -> str:
-        r = requests.get(f"{self._server._url()}/projects/{project.id}")
-        return r.json()["name"]
-        # return dummy_projects[project.id]["name"]
+        data = self._get_project_data(project)
+        return data["name"]
 
-    def set_name(self, project, name: str) -> str:
-        dummy_projects[project.id]["name"] = name
+    def set_name(self, project, name: str) -> None:
+        r = requests.put(
+            f"{self._server.base_url}/projects/{project.id}",
+            json={"name": name, "description": project.description, "status": project.status},
+            timeout=DEFAULT_TIMEOUT,
+        )
+        r.raise_for_status()
 
     def get_description(self, project) -> str:
-        return dummy_projects[project.id]["description"]
+        data = self._get_project_data(project)
+        return data["description"]
 
-    def set_description(self, project, description: str) -> str:
-        r = requests.patch(f"{self._server._url()}/projects/{project.id}", json={"description": description})
-        dummy_projects[project.id]["description"] = description
+    def set_description(self, project, description: str) -> None:
+        r = requests.put(
+            f"{self._server.base_url}/projects/{project.id}",
+            json={"name": project.name, "description": description, "status": project.status},
+            timeout=DEFAULT_TIMEOUT,
+        )
+        r.raise_for_status()
 
     def get_status(self, project) -> str:
-        return dummy_projects[project.id]["status"]
+        data = self._get_project_data(project)
+        return data["status"]
 
-    def set_status(self, project, status: str) -> str:
-        dummy_projects[project.id]["status"] = status
+    def set_status(self, project, status: str) -> None:
+        r = requests.put(
+            f"{self._server.base_url}/projects/{project.id}",
+            json={"name": project.name, "description": project.description, "status": status},
+            timeout=DEFAULT_TIMEOUT,
+        )
+        r.raise_for_status()
 
     def get_created_at(self, project) -> datetime:
-        return dummy_projects[project.id]["created_at"]
+        data = self._get_project_data(project)
+        return datetime.fromisoformat(data["created_at"])
 
 
 class JobConnector:
+    """Handles job-related HTTP requests to the server."""
+
     def __init__(self, server: Server) -> None:
         self._server = server
 
-    def set_status(self, job, status: str) -> None:
-        r = requests.patch(f"{self._server._url()}/jobs/{job.id}", json={"status": status})
+    def _get_job_data(self, job: Job) -> Dict[str, Any]:
+        """Fetch full job data from server."""
+        r = requests.get(
+            f"{self._server.base_url}/jobs/{job.id}",
+            timeout=DEFAULT_TIMEOUT,
+        )
+        r.raise_for_status()
+        return r.json()
+
+    def set_status(self, job: Job, status: str) -> None:
+        # First get current job data to preserve other fields
+        data = self._get_job_data(job)
+        data["status"] = status
+        r = requests.put(
+            f"{self._server.base_url}/jobs/{job.id}",
+            json=data,
+            timeout=DEFAULT_TIMEOUT,
+        )
+        r.raise_for_status()
+
+    def set_priority_to(self, job: Job, priority: int) -> None:
+        data = self._get_job_data(job)
+        data["priority"] = priority
+        r = requests.put(
+            f"{self._server.base_url}/jobs/{job.id}",
+            json=data,
+            timeout=DEFAULT_TIMEOUT,
+        )
+        r.raise_for_status()
+
+    def set_depends_to(self, job: Job, depends: List[Job]) -> None:
+        data = self._get_job_data(job)
+        data["depends"] = {str(j.id): j.name for j in depends}
+        r = requests.put(
+            f"{self._server.base_url}/jobs/{job.id}",
+            json=data,
+            timeout=DEFAULT_TIMEOUT,
+        )
+        r.raise_for_status()
 
 
-# this class handles all communcation with the server
 class Server:
-    def __init__(self, hostname: str, port: int):
+    """Client interface to the WhatsNext server.
+
+    Handles all HTTP communication with the server. This class is stateless -
+    all job and project data is stored on the server.
+    """
+
+    def __init__(self, hostname: str, port: int) -> None:
         self.hostname = hostname
         self.port = port
+        self.base_url = f"http://{hostname}:{port}"
         self._project_connector = ProjectConnector(self)
         self._job_connector = JobConnector(self)
         self._test_connection()
 
-    def _url(self):
-        return f"http://{self.hostname}:{self.port}"
+    def _test_connection(self) -> None:
+        """Test connection to the server."""
+        try:
+            r = requests.get(self.base_url, timeout=DEFAULT_TIMEOUT)
+            r.raise_for_status()
+            logger.info(f"Connected to server at {self.hostname}:{self.port}")
+        except ConnectionError:
+            raise ConnectionError(f"Cannot connect to server at {self.hostname}:{self.port}")
+        except Timeout:
+            raise Timeout(f"Connection to server at {self.hostname}:{self.port} timed out")
 
-    def list_projects(self, limit: int = 10, skip: int = 0, status: str = "ACTIVE", sort_by: str = None) -> List[Project]:
-        r = requests.get(f"{self._url()}/projects?limit={limit}&skip={skip}&status={status}")
+    def list_projects(
+        self,
+        limit: int = 10,
+        skip: int = 0,
+        status: str = "ACTIVE",
+    ) -> None:
+        """Print a formatted table of projects."""
+        r = requests.get(
+            f"{self.base_url}/projects",
+            params={"limit": limit, "skip": skip, "status_filter": status},
+            timeout=DEFAULT_TIMEOUT,
+        )
         if not r.ok:
-            print(f"Error: Could not retrieve projects. HTTP Status {r.status_code}")
+            logger.error(f"Failed to retrieve projects: HTTP {r.status_code}")
             return
         projects = r.json()
+        if not projects:
+            print("No projects found.")
+            return
         headers = list(projects[0].keys())
         body = [list(p.values()) for p in projects]
         print(tabulate(body, headers=headers, tablefmt="grid"))
 
-    def get_project(self: str, project_name: str) -> Project:
-        r = requests.get(f"{self._url()}/projects/name/{project_name}")
+    def get_project(self, project_name: str) -> Optional[Project]:
+        """Get a project by name."""
+        r = requests.get(
+            f"{self.base_url}/projects/name/{project_name}",
+            timeout=DEFAULT_TIMEOUT,
+        )
         if not r.ok:
-            print(f"Error: Could not retrieve project '{project_name}'. HTTP Status {r.status_code}")
-            return
-        project = r.json()
-        return Project(project["id"], self)
-        # for project_id, project in dummy_projects.items():
-        #     if project["name"] == project_name:
-        #         return Project(project_id, self)
-        # raise KeyError(f"Project {project_name} not found")
+            logger.error(f"Failed to retrieve project '{project_name}': HTTP {r.status_code}")
+            return None
+        project_data = r.json()
+        return Project(project_data["id"], self)
 
-    def append_project(self, name: str, description: str, **kwargs):
-        r = requests.post(self._url() + "/projects", json={"name": name, "description": description})
+    def append_project(self, name: str, description: str = "") -> Optional[Project]:
+        """Create a new project."""
+        r = requests.post(
+            f"{self.base_url}/projects",
+            json={"name": name, "description": description},
+            timeout=DEFAULT_TIMEOUT,
+        )
         if r.status_code == 201:
-            project = r.json()
-            print(f"Project '{name}' created successfully with id: {project['id']}")
-        # pars = {"name": name, "description": description, "last_updated": datetime.now(), "created_at": datetime.now(), **kwargs}
-        # dummy_projects[random_string()] = pars
+            project_data = r.json()
+            logger.info(f"Created project '{name}' with id {project_data['id']}")
+            return Project(project_data["id"], self)
+        logger.error(f"Failed to create project: HTTP {r.status_code}")
+        return None
 
-    def delete_project(self, project_name: str):
-        r = requests.delete(f"{self._url()}/projects/name/{project_name}")
+    def delete_project(self, project_name: str) -> bool:
+        """Delete a project by name."""
+        r = requests.delete(
+            f"{self.base_url}/projects/name/{project_name}",
+            timeout=DEFAULT_TIMEOUT,
+        )
         if r.status_code == 204:
-            print(f"Project '{project_name}' deleted successfully.")
+            logger.info(f"Deleted project '{project_name}'")
+            return True
+        logger.error(f"Failed to delete project: HTTP {r.status_code}")
+        return False
 
-    def append_queue(self, project, job: Any):
-        r = requests.get(f"{self._url()}/tasks/name/{job.task}", params={"project_id": project.id})
+    def append_queue(self, project: Project, job: Job) -> bool:
+        """Add a job to the project's queue."""
+        # First get the task ID
+        r = requests.get(
+            f"{self.base_url}/tasks/name/{job.task}",
+            params={"project_id": project.id},
+            timeout=DEFAULT_TIMEOUT,
+        )
+        if not r.ok:
+            logger.error(f"Task '{job.task}' not found for project")
+            return False
         task_id = r.json()["id"]
+
         payload = {
             "name": job.name,
             "project_id": project.id,
@@ -119,47 +234,53 @@ class Server:
             "priority": job.priority,
             "depends": {},
         }
-        r = requests.post(f"{self._url()}/jobs", json=payload)
+        r = requests.post(
+            f"{self.base_url}/jobs",
+            json=payload,
+            timeout=DEFAULT_TIMEOUT,
+        )
         if r.status_code == 201:
-            print(f"Job '{job.name}' for task '{job.task}' with priority {job.priority} added to queue for project '{project.name}'.")
+            logger.info(f"Added job '{job.name}' to queue (priority: {job.priority})")
+            return True
+        logger.error(f"Failed to add job: HTTP {r.status_code}")
+        return False
 
-    def pop_queue(self, project, idx: int = -1):
-        print("Not implemented")
+    def get_queue(self, project: Project) -> List[Dict[str, Any]]:
+        """Get all pending jobs for a project."""
+        r = requests.get(
+            f"{self.base_url}/jobs",
+            params={"project_id": project.id},
+            timeout=DEFAULT_TIMEOUT,
+        )
+        if r.ok:
+            return r.json()
+        return []
 
-    def extend_queue(self, project, jobs: List[Any]):
-        print("Not implemented")
+    def fetch_job(self, project: Project) -> Dict[str, Any]:
+        """Fetch the next pending job from the queue.
 
-    def remove_queue(self, project, job: Any):
-        print("Not implemented")
+        Raises:
+            EmptyQueueError: If no jobs are pending.
+        """
+        r = requests.get(
+            f"{self.base_url}/projects/{project.id}/fetch_job",
+            timeout=DEFAULT_TIMEOUT,
+        )
+        r.raise_for_status()
+        data = r.json()
+        if data["num_pending"] == 0:
+            raise EmptyQueueError("No jobs in queue")
+        return data
 
-    def clear_queue(self, project):
-        print("Not implemented")
-
-    def get_queue(self, project) -> List[Any]:
-        return [j for j in dummy_jobs if j["project_id"] == project.id]
-
-    def _test_connection(self):
-        r = requests.get(self._url())
-        # except requests.exceptions.ConnectionError:
-        #    print(f"Server at {self.hostname}:{self.port} is not available")
-        print(f"Sucessfully connected to server {self.hostname}:{self.port}.")
-
-    def fetch_job(self, project: Project):
-        r = requests.get(f"{self._url()}/projects/{project.id}/fetch_job")
-        if r.status_code == 200:
-            if r.json()["num_pending"] == 0:
-                raise EmptyQueueError("No jobs in queue")
-            job = r.json()
-            return job
-        # for job_id, job_dict in dummy_jobs.items():
-        #     if job_dict["project_id"] == project.id and job_dict["job"].status == "pending":
-        #         job_dict["job"].status = "queued"
-        #         job_dict["job"]._bind_server(self)
-        #         return job_dict["job"]
-        # raise EmptyQueueError("No jobs in queue")
-        # print("All Done!")
-
-    def create_task(self, project: Project, task_name: str):
-        r = requests.post(self._url() + "/tasks", json={"name": task_name, "project_id": project.id})
+    def create_task(self, project: Project, task_name: str) -> bool:
+        """Create a new task for a project."""
+        r = requests.post(
+            f"{self.base_url}/tasks",
+            json={"name": task_name, "project_id": project.id},
+            timeout=DEFAULT_TIMEOUT,
+        )
         if r.status_code == 201:
-            print(f"Task '{task_name}' created successfully for project '{project.name}'.")
+            logger.info(f"Created task '{task_name}' for project")
+            return True
+        logger.error(f"Failed to create task: HTTP {r.status_code}")
+        return False
