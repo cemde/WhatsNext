@@ -1,81 +1,106 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "whatsnext"
 version = "0.0.1"
+description = "A job queue and task management system with client-server architecture"
 authors = [{ name = "Cornelius Emde", email = "ai@corneliusemde.com" }]
-description = "A small example package"
 readme = "README.md"
-requires-python = ">=3.8"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
 classifiers = [
-  "Programming Language :: Python :: 3",
-  "License :: OSI Approved :: MIT License",
-  "Operating System :: OS Independent",
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
 ]
+dependencies = [
+    "pydantic>=2.0.0",
+    "pydantic-settings>=2.0.0",
+]
+
+[project.optional-dependencies]
+# Server dependencies (FastAPI + PostgreSQL)
+server = [
+    "fastapi>=0.100.0",
+    "sqlalchemy>=2.0.0",
+    "psycopg2-binary>=2.9.0",
+    "uvicorn>=0.20.0",
+]
+
+# Client dependencies
+client = [
+    "requests>=2.28.0",
+    "tabulate>=0.9.0",
+]
+
+# All dependencies
+all = ["whatsnext[server,client]"]
 
 [project.urls]
 Homepage = "https://github.com/cemde/WhatsNext"
 Issues = "https://github.com/cemde/WhatsNext/issues"
+Documentation = "https://whatsnext.readthedocs.io/"
 
-
-##########################################
-############## CONFIGURE TOOLING #######
-##########################################
-
-[tool.ruff]
-# Exclude a variety of commonly ignored directories.
-exclude = [
-  ".bzr",
-  ".direnv",
-  ".eggs",
-  ".git",
-  ".git-rewrite",
-  ".hg",
-  ".ipynb_checkpoints",
-  ".mypy_cache",
-  ".nox",
-  ".pants.d",
-  ".pyenv",
-  ".pytest_cache",
-  ".pytype",
-  ".ruff_cache",
-  ".svn",
-  ".tox",
-  ".venv",
-  ".vscode",
-  "__pypackages__",
-  "_build",
-  "buck-out",
-  "build",
-  "dist",
-  "node_modules",
-  "site-packages",
-  "venv",
+[dependency-groups]
+# Development tools (linting, testing, type checking)
+dev = [
+    "pytest>=9.0.0",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.14.0",
+    "ty>=0.0.5",
 ]
 
-# Same as Black.
+# Documentation building
+docs = [
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.7.0",
+    "mkdocstrings[python]>=1.0.0",
+    "pymdown-extensions>=10.0.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["whatsnext*"]
+
+[tool.ruff]
 line-length = 144
-indent-width = 4
+exclude = []
 
-# Assume Python 3.8
-target-version = "py38"
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = ["tests"]
+markers = [
+    "server: Tests that require server dependencies",
+    "client: Tests that require client dependencies",
+    "integration: Integration tests requiring both server and client",
+]
 
-[tool.ruff.lint]
-# Enable Pyflakes (`F`) and a subset of the pycodestyle (`E`)  codes by default.
-# Unlike Flake8, Ruff doesn't enable pycodestyle warnings (`W`) or
-# McCabe complexity (`C901`) by default.
-select = ["E4", "E7", "E9", "F"]
-ignore = []
+[tool.coverage.run]
+relative_files = true
+source = ["whatsnext"]
+omit = ["*/tests/*", "*/__pycache__/*"]
+branch = true
 
-# Allow fix for all enabled rules (when `--fix`) is provided.
-fixable = ["ALL"]
-unfixable = []
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+    "@abstractmethod",
+]
+precision = 2
 
-[tool.ruff.format]
-# Like Black, use double quotes for strings.
-quote-style = "double"
-
-# Like Black, indent with spaces, rather than tabs.
-indent-style = "space"
+[tool.ty.src]
+exclude = []

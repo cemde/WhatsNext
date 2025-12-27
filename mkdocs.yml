@@ -1,0 +1,72 @@
+site_name: WhatsNext
+site_description: "A job queue and task management system with client-server architecture"
+docs_dir: docs
+site_dir: site
+site_author: Cornelius Emde
+repo_name: cemde/WhatsNext
+repo_url: https://github.com/cemde/WhatsNext
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    # Light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+  features:
+    - navigation.sections
+    - content.code.copy
+    - navigation.indexes
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - attr_list
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_section_style: spacy
+            show_signature: true
+            show_signature_annotations: true
+            signature_crossrefs: true
+            separate_signature: true
+            annotations_path: brief
+            show_root_full_path: false
+            show_root_heading: true
+            show_source: false
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Quickstart: getting-started/quickstart.md
+  - Reference:
+      - reference/index.md
+      - Server:
+          - API: reference/server/api.md
+      - Client:
+          - Server: reference/client/server.md
+          - Project: reference/client/project.md
+          - Job: reference/client/job.md
