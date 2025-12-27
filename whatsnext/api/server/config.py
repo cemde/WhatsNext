@@ -1,3 +1,5 @@
+from typing import List, Optional
+
 from pydantic_settings import BaseSettings
 
 
@@ -8,8 +10,32 @@ class Settings(BaseSettings):
     database_password: str
     database_name: str
 
+    # API key authentication (optional - if not set, authentication is disabled)
+    api_keys: Optional[str] = None  # Comma-separated list of valid API keys
+
+    # CORS settings
+    cors_origins: str = "*"  # Comma-separated list of allowed origins, or "*" for all
+    cors_allow_credentials: bool = True
+    cors_allow_methods: str = "*"
+    cors_allow_headers: str = "*"
+
+    # Rate limiting (requests per minute, 0 = disabled)
+    rate_limit_per_minute: int = 0
+
     class Config:
         env_file = ".env"
+
+    def get_api_keys(self) -> List[str]:
+        """Return list of valid API keys, or empty list if auth is disabled."""
+        if not self.api_keys:
+            return []
+        return [key.strip() for key in self.api_keys.split(",") if key.strip()]
+
+    def get_cors_origins(self) -> List[str]:
+        """Return list of allowed CORS origins."""
+        if self.cors_origins == "*":
+            return ["*"]
+        return [origin.strip() for origin in self.cors_origins.split(",") if origin.strip()]
 
 
 class DBSettings:

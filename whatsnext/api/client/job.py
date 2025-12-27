@@ -5,6 +5,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional
 
 if TYPE_CHECKING:
+    from .resource import Resource
     from .server import Server
 
 logger = logging.getLogger(__name__)
@@ -61,7 +62,7 @@ class Job:
         self._server._job_connector.set_depends_to(self, depends)
         self.depends = depends
 
-    def run(self, resource) -> int:
+    def run(self, resource: "Resource") -> int:
         """Execute the job using the resource's formatter.
 
         Args:

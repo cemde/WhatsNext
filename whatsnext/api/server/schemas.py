@@ -118,17 +118,54 @@ class TaskBase(BaseModel):
 
 
 class TaskCreate(TaskBase):
-    pass
+    command_template: Optional[str] = None
+    required_cpu: int = 1
+    required_accelerators: int = 0
 
 
-class TaskUpdate(TaskBase):
-    pass
+class TaskUpdate(BaseModel):
+    name: Optional[str] = None
+    project_id: Optional[int] = None
+    command_template: Optional[str] = None
+    required_cpu: Optional[int] = None
+    required_accelerators: Optional[int] = None
 
 
 class TaskResponse(TaskBase):
     id: int
+    command_template: Optional[str] = None
+    required_cpu: int
+    required_accelerators: int
     created_at: datetime
     updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+class ClientBase(BaseModel):
+    name: str
+    entity: str
+    description: Optional[str] = None
+    available_cpu: int = 0
+    available_accelerators: int = 0
+
+
+class ClientRegister(ClientBase):
+    id: str
+
+
+class ClientUpdate(BaseModel):
+    available_cpu: Optional[int] = None
+    available_accelerators: Optional[int] = None
+    is_active: Optional[int] = None
+
+
+class ClientResponse(ClientBase):
+    id: str
+    last_heartbeat: datetime
+    created_at: datetime
+    is_active: int
 
     class Config:
         from_attributes = True

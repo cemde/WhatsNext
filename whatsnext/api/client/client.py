@@ -31,6 +31,9 @@ class Client:
         description: str,
         project: "Project",
         formatter: Formatter,
+        available_cpu: int = 1,
+        available_accelerators: int = 0,
+        register_with_server: bool = True,
     ) -> None:
         self.id = random_string()
         self.entity = entity
@@ -42,6 +45,40 @@ class Client:
         self.formatter = formatter
         self.active_resources: List[Resource] = []
         self._shutdown_requested = False
+        self.available_cpu = available_cpu
+        self.available_accelerators = available_accelerators
+        self._registered = False
+
+        if register_with_server:
+            self._register()
+
+    def _register(self) -> None:
+        """Register the client with the server."""
+        server = self.project._server
+        if server is None:
+            logger.warning("Cannot register client: project is not bound to a server")
+            return
+
+        success = server.register_client(
+            client_id=self.id,
+            name=self.name,
+            entity=self.entity,
+            description=self.description,
+            available_cpu=self.available_cpu,
+            available_accelerators=self.available_accelerators,
+        )
+        if success:
+            self._registered = True
+            logger.info(f"Client {self.id} registered with server")
+        else:
+            logger.warning(f"Failed to register client {self.id} with server")
+
+    def _deactivate(self) -> None:
+        """Deactivate the client on the server."""
+        server = self.project._server
+        if self._registered and server is not None:
+            server.deactivate_client(self.id)
+            self._registered = False
 
     def allocate_resource(self, cpu: int, accelerator: List[str]) -> Resource:
         """Allocate a resource for job execution.
@@ -72,6 +109,7 @@ class Client:
         resource: Optional[Resource] = None,
         poll_interval: float = 5.0,
         run_forever: bool = False,
+        use_resource_filter: bool = True,
     ) -> int:
         """Continuously fetch and execute jobs until queue is empty.
 
@@ -80,6 +118,7 @@ class Client:
                 a default resource with 1 CPU and no accelerators.
             poll_interval: Seconds to wait between polling when run_forever=True.
             run_forever: If True, wait for new jobs instead of exiting on empty queue.
+            use_resource_filter: If True, only fetch jobs that match client's resources.
 
         Returns:
             Number of jobs executed.
@@ -100,7 +139,14 @@ class Client:
         try:
             while not self._shutdown_requested:
                 try:
-                    job = self.project.fetch_job()
+                    # Fetch job with resource filtering if enabled
+                    if use_resource_filter:
+                        job = self.project.fetch_job(
+                            available_cpu=self.available_cpu,
+                            available_accelerators=self.available_accelerators,
+                        )
+                    else:
+                        job = self.project.fetch_job()
                     logger.info(f"Fetched job {job.id}: {job.name}")
                     exit_code = job.run(resource)
                     jobs_executed += 1
@@ -126,6 +172,10 @@ class Client:
 
             # Mark resource as inactive
             resource.set_status("inactive")
+
+            # Deactivate client on server
+            self._deactivate()
+
             logger.info(f"Worker finished. Executed {jobs_executed} jobs.")
 
         return jobs_executed

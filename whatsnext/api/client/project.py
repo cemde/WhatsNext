@@ -60,8 +60,16 @@ class Project:
         """Get all jobs in the queue from the server."""
         return self._check_server().get_queue(self)
 
-    def fetch_job(self) -> Job:
+    def fetch_job(
+        self,
+        available_cpu: int = 0,
+        available_accelerators: int = 0,
+    ) -> Job:
         """Fetch the next pending job from the queue.
+
+        Args:
+            available_cpu: Filter jobs by available CPU (0 = no filter).
+            available_accelerators: Filter jobs by available accelerators (0 = no filter).
 
         Returns:
             The next job to execute.
@@ -70,7 +78,11 @@ class Project:
             EmptyQueueError: If no jobs are pending.
         """
         server = self._check_server()
-        return_value = server.fetch_job(self)
+        return_value = server.fetch_job(
+            self,
+            available_cpu=available_cpu,
+            available_accelerators=available_accelerators,
+        )
         job_data = return_value["job"]
         # Transform server response to Job constructor args
         del job_data["project_id"]

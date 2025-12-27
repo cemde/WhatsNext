@@ -1,5 +1,5 @@
 site_name: WhatsNext
-site_description: "A job queue and task management system with client-server architecture"
+site_description: "A simple, powerful job queue for Python applications"
 docs_dir: docs
 site_dir: site
 site_author: Cornelius Emde
@@ -30,14 +30,31 @@ theme:
 
   features:
     - navigation.sections
-    - content.code.copy
+    - navigation.expand
+    - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.indexes
+    - content.code.copy
+    - content.code.annotate
+    - search.suggest
+    - search.highlight
+
+  icon:
+    repo: fontawesome/brands/github
 
 markdown_extensions:
   - admonition
   - pymdownx.details
   - pymdownx.superfences
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
   - attr_list
+  - md_in_html
+  - tables
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
@@ -58,15 +75,24 @@ plugins:
             show_root_heading: true
             show_source: false
 
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/cemde/WhatsNext
+
 nav:
   - Home: index.md
   - Getting Started:
       - Quickstart: getting-started/quickstart.md
+      - Configuration: getting-started/configuration.md
+      - Formatters: getting-started/formatters.md
+      - Deployment: getting-started/deployment.md
   - Reference:
       - reference/index.md
-      - Server:
-          - API: reference/server/api.md
-      - Client:
+      - Server API: reference/server/api.md
+      - Client Library:
           - Server: reference/client/server.md
           - Project: reference/client/project.md
           - Job: reference/client/job.md
+          - Client: reference/client/client.md
+          - Formatters: reference/client/formatters.md

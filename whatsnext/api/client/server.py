@@ -256,14 +256,31 @@ class Server:
             return r.json()
         return []
 
-    def fetch_job(self, project: Project) -> Dict[str, Any]:
+    def fetch_job(
+        self,
+        project: Project,
+        available_cpu: int = 0,
+        available_accelerators: int = 0,
+    ) -> Dict[str, Any]:
         """Fetch the next pending job from the queue.
+
+        Args:
+            project: The project to fetch jobs from.
+            available_cpu: Filter jobs by available CPU (0 = no filter).
+            available_accelerators: Filter jobs by available accelerators (0 = no filter).
 
         Raises:
             EmptyQueueError: If no jobs are pending.
         """
+        params: Dict[str, Any] = {}
+        if available_cpu > 0:
+            params["available_cpu"] = available_cpu
+        if available_accelerators > 0:
+            params["available_accelerators"] = available_accelerators
+
         r = requests.get(
             f"{self.base_url}/projects/{project.id}/fetch_job",
+            params=params,
             timeout=DEFAULT_TIMEOUT,
         )
         r.raise_for_status()
@@ -371,3 +388,116 @@ class Server:
             return data["job_ids"]
         logger.error(f"Failed to add jobs: HTTP {r.status_code}")
         return []
+
+    def register_client(
+        self,
+        client_id: str,
+        name: str,
+        entity: str,
+        description: str = "",
+        available_cpu: int = 0,
+        available_accelerators: int = 0,
+    ) -> bool:
+        """Register a client with the server.
+
+        Args:
+            client_id: Unique client identifier.
+            name: Human-readable name.
+            entity: Entity/organization the client belongs to.
+            description: Optional description.
+            available_cpu: Number of available CPUs.
+            available_accelerators: Number of available accelerators.
+
+        Returns:
+            True if registration successful, False otherwise.
+        """
+        r = requests.post(
+            f"{self.base_url}/clients/register",
+            json={
+                "id": client_id,
+                "name": name,
+                "entity": entity,
+                "description": description,
+                "available_cpu": available_cpu,
+                "available_accelerators": available_accelerators,
+            },
+            timeout=DEFAULT_TIMEOUT,
+        )
+        if r.status_code == 201:
+            logger.info(f"Registered client '{name}' with id {client_id}")
+            return True
+        logger.error(f"Failed to register client: HTTP {r.status_code}")
+        return False
+
+    def client_heartbeat(self, client_id: str) -> bool:
+        """Send a heartbeat for a registered client.
+
+        Args:
+            client_id: The client ID.
+
+        Returns:
+            True if heartbeat successful, False otherwise.
+        """
+        r = requests.post(
+            f"{self.base_url}/clients/{client_id}/heartbeat",
+            timeout=DEFAULT_TIMEOUT,
+        )
+        if r.ok:
+            return True
+        logger.warning(f"Failed to send heartbeat for client {client_id}: HTTP {r.status_code}")
+        return False
+
+    def deactivate_client(self, client_id: str) -> bool:
+        """Deactivate a client (graceful disconnect).
+
+        Args:
+            client_id: The client ID.
+
+        Returns:
+            True if deactivation successful, False otherwise.
+        """
+        r = requests.post(
+            f"{self.base_url}/clients/{client_id}/deactivate",
+            timeout=DEFAULT_TIMEOUT,
+        )
+        if r.ok:
+            logger.info(f"Deactivated client {client_id}")
+            return True
+        logger.error(f"Failed to deactivate client: HTTP {r.status_code}")
+        return False
+
+    def update_client_resources(
+        self,
+        client_id: str,
+        available_cpu: Optional[int] = None,
+        available_accelerators: Optional[int] = None,
+    ) -> bool:
+        """Update a client's available resources.
+
+        Args:
+            client_id: The client ID.
+            available_cpu: New available CPU count (None = no change).
+            available_accelerators: New available accelerator count (None = no change).
+
+        Returns:
+            True if update successful, False otherwise.
+        """
+        payload: Dict[str, Any] = {}
+        if available_cpu is not None:
+            payload["available_cpu"] = available_cpu
+        if available_accelerators is not None:
+            payload["available_accelerators"] = available_accelerators
+
+        if not payload:
+            return True  # Nothing to update
+
+        r = requests.put(
+            f"{self.base_url}/clients/{client_id}",
+            json=payload,
+            timeout=DEFAULT_TIMEOUT,
+        )
+        if r.ok:
+            logger.info(f"Updated resources for client {client_id}")
+            return True
+        logger.error(f"Failed to update client resources: HTTP {r.status_code}")
+        return False

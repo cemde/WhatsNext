@@ -30,6 +30,7 @@ server = [
     "fastapi>=0.100.0",
     "sqlalchemy>=2.0.0",
     "psycopg2-binary>=2.9.0",
+    "pydantic-settings>=2.0.0",
     "uvicorn>=0.20.0",
 ]
 
@@ -52,6 +53,7 @@ Documentation = "https://whatsnext.readthedocs.io/"
 dev = [
     "pytest>=9.0.0",
     "pytest-cov>=7.0.0",
+    "httpx>=0.27.0",
     "ruff>=0.14.0",
     "ty>=0.0.5",
 ]

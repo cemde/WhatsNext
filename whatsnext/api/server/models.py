@@ -46,6 +46,9 @@ class Task(Base):
     id = Column(Integer, primary_key=True, index=True, nullable=False)
     name = Column(String, index=True, nullable=False)
     project_id = Column(Integer, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False)
+    command_template = Column(String, nullable=True)
+    required_cpu = Column(Integer, default=1, nullable=False)
+    required_accelerators = Column(Integer, default=0, nullable=False)
     created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
     updated_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"), server_onupdate=text("now()"))
 
@@ -53,3 +56,20 @@ class Task(Base):
 
     def __repr__(self):
         return f"<Task {self.name}>"
+
+
+class Client(Base):
+    __tablename__ = "clients"
+
+    id = Column(String, primary_key=True, index=True, nullable=False)
+    name = Column(String, index=True, nullable=False)
+    entity = Column(String, nullable=False)
+    description = Column(String, nullable=True)
+    available_cpu = Column(Integer, default=0, nullable=False)
+    available_accelerators = Column(Integer, default=0, nullable=False)
+    last_heartbeat = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
+    created_at = Column(TIMESTAMP(timezone=True), nullable=False, server_default=text("now()"))
+    is_active = Column(Integer, default=1, nullable=False)
+
+    def __repr__(self):
+        return f"<Client {self.name}>"

@@ -58,8 +58,11 @@ def update_task(id: int, task: schemas.TaskUpdate, db: Session = Depends(get_db)
     old_task = task_query.first()
     if old_task is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Task with id {id} not found.")
-    task_query.update(task.model_dump(), synchronize_session=False)
-    db.commit()
+
+    update_data = {k: v for k, v in task.model_dump().items() if v is not None}
+    if update_data:
+        task_query.update(update_data, synchronize_session=False)
+        db.commit()
     return {"data": task_query.first()}
 
 

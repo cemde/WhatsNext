@@ -82,14 +82,24 @@ def delete_project_by_name(name: str, db: Session = Depends(get_db)):
 
 
 @router.get("/{id}/fetch_job", response_model=schemas.JobAndCountResponse)
-def fetch_job(id: int, db: Session = Depends(get_db)):
+def fetch_job(
+    id: int,
+    db: Session = Depends(get_db),
+    available_cpu: int = 0,
+    available_accelerators: int = 0,
+):
     """Fetch the next job ready for execution.
 
     Only returns jobs whose dependencies are all COMPLETED.
     Jobs with failed dependencies are automatically marked as BLOCKED.
+
+    Args:
+        id: Project ID.
+        available_cpu: Filter jobs by available CPU (0 = no filter).
+        available_accelerators: Filter jobs by available accelerators (0 = no filter).
     """
     # Get jobs with completed dependencies (this also marks blocked jobs)
-    ready_jobs = get_jobs_with_completed_dependencies(db, id)
+    ready_jobs = get_jobs_with_completed_dependencies(db, id, available_cpu=available_cpu, available_accelerators=available_accelerators)
 
     # Count all pending jobs (including those waiting for dependencies)
     job_count = db.query(models.Job).filter(models.Job.project_id == id).filter(models.Job.status == models.JobStatus.PENDING).count()

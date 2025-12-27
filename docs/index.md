@@ -1,71 +1,145 @@
 # WhatsNext
 
-A job queue and task management system with client-server architecture.
+**A simple, powerful job queue for Python applications.**
 
-## Overview
+WhatsNext helps you manage and execute background jobs across multiple machines. Think of it as a to-do list for your computer programs - you add jobs to a queue, and workers pick them up and run them.
 
-WhatsNext provides a distributed job queue system built on:
+## Why WhatsNext?
 
-- **FastAPI Server**: REST API for managing projects, tasks, and jobs
-- **Python Client**: Library for interacting with the server
-- **PostgreSQL Backend**: Persistent storage for job queue state
+- **Simple**: Just a few lines of code to get started
+- **Reliable**: Jobs are stored in PostgreSQL, so nothing gets lost
+- **Scalable**: Run multiple workers on different machines
+- **Flexible**: Works with any Python code, SLURM clusters, or Kubernetes
 
-## Features
+## How It Works
 
-- Project-based organization of tasks and jobs
-- Priority-based job queue with status tracking
-- Job dependencies support
-- Resource allocation tracking (CPU/accelerators)
-
-## Installation
-
-```bash
-# Install with uv (recommended)
-uv pip install whatsnext
-
-# Install server dependencies
-uv pip install whatsnext[server]
-
-# Install client dependencies
-uv pip install whatsnext[client]
-
-# Install everything
-uv pip install whatsnext[all]
 ```
+┌─────────────┐     ┌──────────────┐     ┌─────────────┐
+│  Your Code  │────>│   Server     │────>│   Worker    │
+│  (add jobs) │     │  (PostgreSQL)│     │ (runs jobs) │
+└─────────────┘     └──────────────┘     └─────────────┘
+```
+
+1. **You add jobs** to a project's queue
+2. **The server** stores them in the database
+3. **Workers** fetch jobs and execute them
 
 ## Quick Example
 
+Here's all you need to queue and run jobs:
+
 ```python
-from whatsnext.api.client import Server
+from whatsnext.api.client import Server, Job, Client, CLIFormatter
 
-# Connect to the server
-server = Server("http://localhost:8000")
+# 1. Connect to the server
+server = Server("localhost", 8000)
 
-# Get or create a project
-project = server.get_project("my-project")
+# 2. Get (or create) a project
+project = server.get_project("my-experiments")
+if project is None:
+    project = server.append_project("my-experiments", "ML training jobs")
 
-# Queue a job
-job = project.append(name="process-data", parameters={"input": "data.csv"})
+# 3. Create a task type
+project.create_task("train-model")
 
-# Fetch and run jobs
-while job := project.pop():
-    job.run()
+# 4. Add jobs to the queue
+project.append_queue(Job(
+    name="experiment-1",
+    task="train-model",
+    parameters={"learning_rate": 0.01, "epochs": 100}
+))
+
+# 5. Create a worker to run jobs
+formatter = CLIFormatter(executable="python", script="train.py")
+client = Client(
+    entity="ml-team",
+    name="gpu-worker-1",
+    description="GPU training worker",
+    project=project,
+    formatter=formatter
+)
+
+# 6. Start processing jobs
+client.work()  # Runs until queue is empty
 ```
 
-## Development
+## Installation
 
-```bash
-# Clone and install with dev dependencies
-git clone https://github.com/cemde/WhatsNext.git
-cd WhatsNext
-uv sync --group dev
+=== "With uv (Recommended)"
 
-# Run tests
-uv run pytest
+    ```bash
+    # Install everything (client + server)
+    uv pip install whatsnext[all]
+    ```
 
-# Run linting
-uv run ruff check .
+=== "With pip"
 
-# Run type checking
-uv run ty check whatsnext
-```
+    ```bash
+    # Install everything (client + server)
+    pip install whatsnext[all]
+    ```
+
+=== "Client Only"
+
+    ```bash
+    # If you only need to submit/manage jobs
+    uv pip install whatsnext[client]
+    ```
+
+=== "Server Only"
+
+    ```bash
+    # If you only need to run the API server
+    uv pip install whatsnext[server]
+    ```
+
+## What's Next?
+
+<div class="grid cards" markdown>
+
+-   :material-rocket-launch: **[Quickstart Guide](getting-started/quickstart.md)**
+
+    ---
+
+    Get up and running in 5 minutes with a complete working example
+
+-   :material-cog: **[Configuration](getting-started/configuration.md)**
+
+    ---
+
+    Learn how to configure the server, authentication, and security
+
+-   :material-format-list-bulleted: **[Formatters](getting-started/formatters.md)**
+
+    ---
+
+    Run jobs locally, on SLURM clusters, or with RUNAI/Kubernetes
+
+-   :material-server: **[Deployment](getting-started/deployment.md)**
+
+    ---
+
+    Deploy WhatsNext for production use with systemd and nginx
+
+</div>
+
+## Key Concepts
+
+| Concept | What It Is | Example |
+|---------|------------|---------|
+| **Project** | A container for related work | "image-processing", "ml-training" |
+| **Task** | A type of job that can be run | "resize-image", "train-model" |
+| **Job** | A specific instance of a task | "resize image-001.jpg to 800x600" |
+| **Client** | A worker that executes jobs | A GPU server running your training code |
+| **Formatter** | Converts job parameters to commands | CLIFormatter, SlurmFormatter, RUNAIFormatter |
+
+## Requirements
+
+- **Python**: 3.10 or higher
+- **PostgreSQL**: 14 or higher (for the server)
+- **Operating System**: Linux, macOS, or Windows
+
+## Getting Help
+
+- **GitHub Issues**: [Report bugs or request features](https://github.com/cemde/WhatsNext/issues)
+- **Source Code**: [View on GitHub](https://github.com/cemde/WhatsNext)

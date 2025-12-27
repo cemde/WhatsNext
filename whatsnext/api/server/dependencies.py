@@ -175,12 +175,19 @@ def propagate_failure(db: Session, failed_job: models.Job) -> int:
     return blocked_count
 
 
-def get_jobs_with_completed_dependencies(db: Session, project_id: int) -> List[models.Job]:
+def get_jobs_with_completed_dependencies(
+    db: Session,
+    project_id: int,
+    available_cpu: int = 0,
+    available_accelerators: int = 0,
+) -> List[models.Job]:
     """Get all PENDING jobs whose dependencies are all COMPLETED.
 
     Args:
         db: Database session.
         project_id: The project to query.
+        available_cpu: Filter by CPU requirement (0 = no filter).
+        available_accelerators: Filter by accelerator requirement (0 = no filter).
 
     Returns:
         List of jobs ready to be executed.
@@ -198,6 +205,14 @@ def get_jobs_with_completed_dependencies(db: Session, project_id: int) -> List[m
     ready_jobs = []
     for job in pending_jobs:
         if are_dependencies_completed(db, job):
+            # Check resource requirements if filters are provided
+            if available_cpu > 0 or available_accelerators > 0:
+                task = db.query(models.Task).filter(models.Task.id == job.task_id).first()
+                if task:
+                    if available_cpu > 0 and task.required_cpu > available_cpu:
+                        continue  # Job requires more CPU than available
+                    if available_accelerators > 0 and task.required_accelerators > available_accelerators:
+                        continue  # Job requires more accelerators than available
             ready_jobs.append(job)
         elif has_failed_dependency(db, job):
             # Mark as blocked if a dependency failed
