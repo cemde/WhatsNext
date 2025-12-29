@@ -7,7 +7,7 @@ from rich.console import Console
 
 from .commands import auth, clients, db, init, jobs, projects, queue, status, tasks, worker
 
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 # Create main app
 app = typer.Typer(
