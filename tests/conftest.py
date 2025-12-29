@@ -5,6 +5,20 @@ from unittest.mock import MagicMock
 import pytest
 
 
+def pytest_collection_modifyitems(config, items):
+    """Automatically apply markers based on test directory."""
+    for item in items:
+        # Get the path relative to tests/
+        path = str(item.fspath)
+        if "test_client" in path or "test_cli" in path:
+            item.add_marker(pytest.mark.client)
+        elif "test_server" in path:
+            item.add_marker(pytest.mark.server)
+        # test_init.py gets client marker (no server deps)
+        elif "test_init.py" in path:
+            item.add_marker(pytest.mark.client)
+
+
 @pytest.fixture
 def mock_server():
     """Create a mock Server for testing."""
