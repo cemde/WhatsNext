@@ -89,7 +89,14 @@ nav:
       - Deployment: getting-started/deployment.md
   - Reference:
       - reference/index.md
-      - Server API: reference/server/api.md
+      - REST API: reference/server/api.md
+      - Server:
+          - Models: reference/server/models.md
+          - Schemas: reference/server/schemas.md
+          - Routers: reference/server/routers.md
+          - Database: reference/server/database.md
+          - Configuration: reference/server/config.md
+          - Main App: reference/server/main.md
       - Client Library:
           - Server: reference/client/server.md
           - Project: reference/client/project.md

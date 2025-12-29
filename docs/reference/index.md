@@ -21,7 +21,7 @@ WhatsNext has two main components:
 | [Client](client/client.md) | Worker that executes jobs |
 | [Formatters](client/formatters.md) | Convert parameters to commands |
 
-### Server API
+### REST API
 
 | Endpoint Group | Purpose |
 |----------------|---------|
@@ -29,6 +29,17 @@ WhatsNext has two main components:
 | [Tasks](server/api.md#tasks) | Define job types with resource requirements |
 | [Jobs](server/api.md#jobs) | Queue and manage jobs |
 | [Clients](server/api.md#clients) | Register and monitor workers |
+
+### Server Internals
+
+| Module | Purpose |
+|--------|---------|
+| [Models](server/models.md) | SQLAlchemy ORM models |
+| [Schemas](server/schemas.md) | Pydantic request/response schemas |
+| [Routers](server/routers.md) | FastAPI endpoint definitions |
+| [Database](server/database.md) | Database connection and sessions |
+| [Configuration](server/config.md) | Server settings |
+| [Main App](server/main.md) | FastAPI application setup |
 
 ## Common Patterns
 

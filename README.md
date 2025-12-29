@@ -1,57 +1,99 @@
 # WhatsNext
 
-## Install
+A simple, powerful job queue for Python applications.
+
+WhatsNext helps you manage and execute background jobs across multiple machines. Add jobs to a queue, and workers pick them up and run them.
+
+## Features
+
+- **Simple**: Just a few lines of code to get started
+- **Reliable**: Jobs are stored in PostgreSQL, so nothing gets lost
+- **Scalable**: Run multiple workers on different machines
+- **Flexible**: Works with any Python code, SLURM clusters, or Kubernetes
+
+## Quick Example
 
 ```python
-pip install -e /path/to/this/repo/ --config-settings editable_mode=strict
+from whatsnext.api.client import Server, Job, Client, CLIFormatter
 
-pip install -e . --config-settings editable_mode=strict
+# Connect and get a project
+server = Server("localhost", 8000)
+project = server.get_project("my-experiments")
 
+# Add a job to the queue
+project.append_queue(Job(
+    name="experiment-1",
+    task="train-model",
+    parameters={"learning_rate": 0.01, "epochs": 100}
+))
+
+# Create a worker and process jobs
+formatter = CLIFormatter(executable="python", script="train.py")
+client = Client(
+    entity="ml-team",
+    name="gpu-worker-1",
+    project=project,
+    formatter=formatter
+)
+client.work()
 ```
 
-## Dev
+## Installation
 
-start postgresql server
+```bash
+# Install with uv (recommended)
+uv pip install whatsnext[all]
 
-```
-For compilers to find postgresql@16 you may need to set:
-  export LDFLAGS="-L/opt/homebrew/opt/postgresql@16/lib"
-  export CPPFLAGS="-I/opt/homebrew/opt/postgresql@16/include"
-```
-
-```
-brew services start postgresql@16
+# Or with pip
+pip install whatsnext[all]
 ```
 
-update schemas etc
+## Requirements
 
+- Python 3.10+
+- PostgreSQL 14+
+
+## Running the Server
+
+1. Create a `.env` file with your database configuration:
+
+```bash
+database_hostname=localhost
+database_port=5432
+database_user=postgres
+database_password=postgres
+database_name=whatsnext
 ```
-psql postgres
+
+2. Start the server:
+
+```bash
+uvicorn whatsnext.api.server.main:app --reload
 ```
 
+3. Visit http://localhost:8000/docs for interactive API documentation.
+
+## Documentation
+
+Full documentation is available at the project docs site. Build locally with:
+
+```bash
+uv run mkdocs serve
 ```
-cat /opt/homebrew/var/log/postgres.log
+
+## Development
+
+```bash
+# Install dependencies
+uv sync --all-extras --all-groups
+
+# Run quality checks
+uv run ruff format .
+uv run ruff check . --fix
+uv run ty check whatsnext
+uv run pytest -v
 ```
 
-##  TODO
+## License
 
-* protected Routes
-* Env Variables in Tutorial
-* SQL joins
-* SQL foreign keys
-* Disable SQLA create Engine
-* CORS
-
-## DB Model TODO
-
-1. Join, foreign key,
-2. tags for job
-3. Task table, register task with project, task field for job.
-3. Job Status to seperate table: status_id, string, running_on.
-4. Depends on seperate table?
-
-## Next steps
-
-1. define a consistent datamodel in and out (eg. task_name etc)
-2. be consitent with checks and return cose
-3. job.run() sync with server.
+MIT
