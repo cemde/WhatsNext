@@ -50,8 +50,7 @@ if settings.rate_limit_per_minute > 0:
     app.add_middleware(RateLimitMiddleware, requests_per_minute=settings.rate_limit_per_minute)  # type: ignore[arg-type]
 else:
     logger.warning(
-        "SECURITY: Rate limiting is disabled. Set rate_limit_per_minute to enable. "
-        "This makes the API vulnerable to denial-of-service attacks."
+        "SECURITY: Rate limiting is disabled. Set rate_limit_per_minute to enable. This makes the API vulnerable to denial-of-service attacks."
     )
 
 # Add authentication middleware (if API keys are configured)
@@ -59,10 +58,7 @@ api_keys = settings.get_api_keys()
 if api_keys:
     app.add_middleware(AuthenticationMiddleware, api_keys=api_keys)  # type: ignore[arg-type]
 else:
-    logger.warning(
-        "SECURITY: Authentication is disabled. Set api_keys to enable. "
-        "All API endpoints are publicly accessible."
-    )
+    logger.warning("SECURITY: Authentication is disabled. Set api_keys to enable. All API endpoints are publicly accessible.")
 
 app.include_router(jobs.router)
 app.include_router(projects.router)

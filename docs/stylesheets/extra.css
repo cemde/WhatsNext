@@ -1,0 +1,9 @@
+/* Light mode logo (default) */
+.md-header__button.md-logo img {
+  content: url("../assets/favicon-light.svg");
+}
+
+/* Dark mode logo */
+[data-md-color-scheme="slate"] .md-header__button.md-logo img {
+  content: url("../assets/favicon-dark.svg");
+}

@@ -26,6 +26,7 @@ def _constant_time_compare(provided_key: str, valid_keys: List[str]) -> bool:
             result = True
     return result
 
+
 # API key header
 API_KEY_HEADER = APIKeyHeader(name="X-API-Key", auto_error=False)
 

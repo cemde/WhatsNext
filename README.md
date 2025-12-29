@@ -1,5 +1,9 @@
 <p align="center">
-  <img src="assets/logo.svg" alt="WhatsNext logo" width="280" />
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo-dark.svg">
+    <source media="(prefers-color-scheme: light)" srcset="assets/logo-light.svg">
+    <img src="assets/logo-light.svg" alt="WhatsNext logo" width="280" />
+  </picture>
 </p>
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)

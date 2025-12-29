@@ -9,8 +9,8 @@ edit_uri: edit/main/docs/
 
 theme:
   name: material
-  favicon: assets/favicon.svg
-  logo: assets/favicon.svg
+  favicon: assets/favicon-dark.svg
+  logo: assets/favicon-light.svg
   palette:
     # Light mode
     - media: "(prefers-color-scheme: light)"
@@ -81,6 +81,9 @@ extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/cemde/WhatsNext
+
+extra_css:
+  - stylesheets/extra.css
 
 nav:
   - Home: index.md
