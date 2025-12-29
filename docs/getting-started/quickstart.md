@@ -73,7 +73,7 @@ pip install whatsnext[all]
 !!! tip "Using uv?"
     If you prefer uv (faster package manager):
     ```bash
-    uv pip install whatsnext[all]
+    uv add whatsnext[all]
     ```
 
 ## Step 2: Set Up PostgreSQL

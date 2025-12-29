@@ -127,9 +127,8 @@ pip install whatsnext[server]
 !!! tip "Using uv instead of pip?"
     If you prefer uv (a faster package manager), use:
     ```bash
-    uv venv
-    source .venv/bin/activate
-    uv pip install whatsnext[server]
+    uv init
+    uv add whatsnext[server]
     ```
 
 ---

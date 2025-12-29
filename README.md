@@ -59,7 +59,7 @@ client.work()
 
 ```bash
 # Install with uv (recommended)
-uv pip install whatsnext[all]
+uv add whatsnext[all]
 
 # Or with pip
 pip install whatsnext[all]

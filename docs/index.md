@@ -70,7 +70,7 @@ client.work()  # Runs until queue is empty
 
     ```bash
     # Install everything (client + server + CLI)
-    uv pip install whatsnext[all]
+    uv add whatsnext[all]
     ```
 
 === "With pip"
