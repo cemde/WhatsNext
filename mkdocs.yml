@@ -9,6 +9,8 @@ edit_uri: edit/main/docs/
 
 theme:
   name: material
+  favicon: assets/favicon.svg
+  logo: assets/favicon.svg
   palette:
     # Light mode
     - media: "(prefers-color-scheme: light)"
@@ -84,23 +86,27 @@ nav:
   - Home: index.md
   - Getting Started:
       - Quickstart: getting-started/quickstart.md
+      - Installation:
+          - Server Setup: getting-started/install-server.md
+          - Client Setup: getting-started/install-client.md
       - Command Line Interface: getting-started/cli.md
       - Configuration: getting-started/configuration.md
       - Formatters: getting-started/formatters.md
       - Deployment: getting-started/deployment.md
-  - Reference:
+  - Server Reference:
+      - Overview: reference/server/api.md
+      - Models: reference/server/models.md
+      - Schemas: reference/server/schemas.md
+      - Routers: reference/server/routers.md
+      - Database: reference/server/database.md
+      - Configuration: reference/server/config.md
+      - Main App: reference/server/main.md
+  - Client Reference:
       - reference/index.md
-      - REST API: reference/server/api.md
-      - Server:
-          - Models: reference/server/models.md
-          - Schemas: reference/server/schemas.md
-          - Routers: reference/server/routers.md
-          - Database: reference/server/database.md
-          - Configuration: reference/server/config.md
-          - Main App: reference/server/main.md
-      - Client Library:
+      - Python Library:
           - Server: reference/client/server.md
           - Project: reference/client/project.md
           - Job: reference/client/job.md
           - Client: reference/client/client.md
           - Formatters: reference/client/formatters.md
+      - Command Line Interface: reference/client/cli.md

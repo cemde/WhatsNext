@@ -10,13 +10,48 @@ We'll create a simple system that:
 2. Submits jobs to process "data files"
 3. Has a worker that runs those jobs
 
+## Architecture Overview
+
+WhatsNext uses a **client-server architecture**. This quickstart covers both:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         YOUR SETUP                                   │
+│                                                                     │
+│  ┌─────────────────────────┐     ┌─────────────────────────────────┐│
+│  │     SERVER SIDE         │     │         CLIENT SIDE              ││
+│  │    (Steps 1-4)          │     │        (Steps 5-7)               ││
+│  │                         │     │                                   ││
+│  │  • PostgreSQL database  │◄───►│  • Submit jobs (Python/CLI)      ││
+│  │  • WhatsNext API        │HTTP │  • Run workers                    ││
+│  │                         │     │                                   ││
+│  └─────────────────────────┘     └─────────────────────────────────┘│
+│                                                                     │
+│  Run on: Your server,           Run on: Your laptop, GPU nodes,     │
+│          Docker container,               HPC clusters, anywhere      │
+│          cloud VM                        with network access         │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+!!! tip "Already have a server?"
+    If someone else is running the server, skip to [Client Setup](install-client.md) to learn how to submit jobs.
+
 ## Prerequisites
 
 Before starting, make sure you have:
 
 - **Python 3.10+** installed
-- **PostgreSQL** running (we'll show you how to set it up)
+- **PostgreSQL** running (we'll show you how to set it up) - **SERVER SIDE ONLY**
 - **10 minutes** of your time
+
+---
+
+# Part 1: Server Setup
+
+These steps set up the WhatsNext server. Do this once on the machine that will host the API.
+
+!!! note "Skip if using existing server"
+    If a server is already running, skip to [Part 2: Client Setup](#part-2-client-setup).
 
 ## Step 1: Install WhatsNext
 
@@ -110,6 +145,12 @@ INFO:     Started reloader process
 
 !!! success "Server Running!"
     Open [http://localhost:8000/docs](http://localhost:8000/docs) to see the API documentation.
+
+---
+
+# Part 2: Client Setup
+
+These steps are done on client machines (your laptop, worker nodes, etc.). The server must be running first.
 
 ## Step 5: Create Your First Job Script
 

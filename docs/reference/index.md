@@ -1,17 +1,52 @@
-# API Reference
+# Reference
 
 Complete reference documentation for WhatsNext.
 
-## Overview
+## Architecture Overview
 
-WhatsNext has two main components:
+WhatsNext follows a client-server architecture:
 
-- **Server**: REST API that manages projects, tasks, jobs, and clients
-- **Client Library**: Python classes for interacting with the server
+```
+┌─────────────────────────────────────────────────────────────┐
+│                        Your Setup                           │
+│                                                             │
+│   ┌─────────────────┐          ┌─────────────────────────┐  │
+│   │  Client Side    │          │      Server Side        │  │
+│   │                 │   HTTP   │                         │  │
+│   │  - Python lib   │ ◄──────► │  - REST API (FastAPI)   │  │
+│   │  - CLI (wnxt)   │          │  - PostgreSQL database  │  │
+│   │  - Workers      │          │                         │  │
+│   └─────────────────┘          └─────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+```
 
-## Quick Links
+Choose the documentation you need:
 
-### Client Library
+---
+
+## Server Reference
+
+Documentation for running and configuring the WhatsNext server.
+
+| Section | Description |
+|---------|-------------|
+| [REST API](server/api.md) | HTTP endpoints for all operations |
+| [Models](server/models.md) | SQLAlchemy ORM models (database tables) |
+| [Schemas](server/schemas.md) | Pydantic request/response schemas |
+| [Routers](server/routers.md) | FastAPI endpoint definitions |
+| [Database](server/database.md) | Database connection and sessions |
+| [Configuration](server/config.md) | Server settings and environment |
+| [Main App](server/main.md) | FastAPI application setup |
+
+---
+
+## Client Reference
+
+Documentation for interacting with WhatsNext as a client.
+
+### Python Library
+
+Use the Python library for programmatic access:
 
 | Class | Purpose |
 |-------|---------|
@@ -21,29 +56,35 @@ WhatsNext has two main components:
 | [Client](client/client.md) | Worker that executes jobs |
 | [Formatters](client/formatters.md) | Convert parameters to commands |
 
-### REST API
+### Command Line Interface
 
-| Endpoint Group | Purpose |
-|----------------|---------|
-| [Projects](server/api.md#projects) | Create, list, update, delete projects |
-| [Tasks](server/api.md#tasks) | Define job types with resource requirements |
-| [Jobs](server/api.md#jobs) | Queue and manage jobs |
-| [Clients](server/api.md#clients) | Register and monitor workers |
+Use the CLI for shell scripts and interactive use:
 
-### Server Internals
+| Command | Purpose |
+|---------|---------|
+| [CLI Reference](client/cli.md) | Complete CLI command reference |
 
-| Module | Purpose |
-|--------|---------|
-| [Models](server/models.md) | SQLAlchemy ORM models |
-| [Schemas](server/schemas.md) | Pydantic request/response schemas |
-| [Routers](server/routers.md) | FastAPI endpoint definitions |
-| [Database](server/database.md) | Database connection and sessions |
-| [Configuration](server/config.md) | Server settings |
-| [Main App](server/main.md) | FastAPI application setup |
+Quick CLI examples:
+
+```bash
+# Check server status
+whatsnext status
+
+# List projects
+whatsnext projects ls
+
+# Add a job
+whatsnext jobs add my-task --param input=data.csv
+
+# Start a worker
+whatsnext worker --project my-project --script process.py
+```
+
+---
 
 ## Common Patterns
 
-### Submitting Jobs
+### Submitting Jobs (Python)
 
 ```python
 from whatsnext.api.client import Server, Job
@@ -61,7 +102,17 @@ job = Job(
 project.append_queue(job)
 ```
 
-### Running Jobs
+### Submitting Jobs (CLI)
+
+```bash
+whatsnext jobs add data-pipeline \
+    --project my-project \
+    --name "process-data" \
+    --param input=file.csv \
+    --param format=json
+```
+
+### Running Jobs (Python)
 
 ```python
 from whatsnext.api.client import Client, CLIFormatter
@@ -78,6 +129,18 @@ client = Client(
 # Process jobs
 client.work()
 ```
+
+### Running Jobs (CLI)
+
+```bash
+whatsnext worker \
+    --project my-project \
+    --script process.py \
+    --entity team \
+    --name worker-1
+```
+
+---
 
 ## Job Dependencies
 
@@ -99,7 +162,11 @@ project.append_queue(job_b)
 
 The `depends` parameter is a dictionary mapping job IDs to job names. When job A completes, job B becomes eligible for execution.
 
-### Resource Requirements
+---
+
+## Resource Requirements
+
+Tasks can specify required resources. Workers only fetch jobs they can handle.
 
 ```python
 import requests
