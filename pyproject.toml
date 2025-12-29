@@ -40,8 +40,20 @@ client = [
     "tabulate>=0.9.0",
 ]
 
+# CLI dependencies
+cli = [
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+    "pyyaml>=6.0",
+    "whatsnext[client]",
+]
+
 # All dependencies
-all = ["whatsnext[server,client]"]
+all = ["whatsnext[server,client,cli]"]
+
+[project.scripts]
+whatsnext = "whatsnext.cli:main"
+wnxt = "whatsnext.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/cemde/WhatsNext"
