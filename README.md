@@ -1,4 +1,13 @@
-# WhatsNext
+<p align="center">
+  <img src="assets/logo.svg" alt="WhatsNext logo" width="280" />
+</p>
+
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+[![PyPI version](https://badge.fury.io/py/whatsnext.svg)](https://badge.fury.io/py/whatsnext)
+[![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://whatsnext.readthedocs.io/)
+[![Tests](https://github.com/cemde/WhatsNext/actions/workflows/test.yml/badge.svg)](https://github.com/cemde/WhatsNext/actions/workflows/test.yml)
+[![License](https://img.shields.io/badge/License-AGPL--3.0-blue.svg)](LICENSE)
+[![CLI](https://img.shields.io/badge/CLI-supported-orange.svg)](https://cemde.github.io/WhatsNext/getting-started/cli/)
 
 A simple, powerful job queue for Python applications.
 
@@ -10,6 +19,7 @@ WhatsNext helps you manage and execute background jobs across multiple machines.
 - **Reliable**: Jobs are stored in PostgreSQL, so nothing gets lost
 - **Scalable**: Run multiple workers on different machines
 - **Flexible**: Works with any Python code, SLURM clusters, or Kubernetes
+- **Lightweight Client**: No database, no caching, no background processes - the client is pure HTTP and runs in restricted environments
 
 ## Quick Example
 
@@ -96,4 +106,4 @@ uv run pytest -v
 
 ## License
 
-MIT
+AGPL-3.0 - See [LICENSE](LICENSE) for details.
