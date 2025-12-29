@@ -1,13 +1,12 @@
 """Tests for the Project class."""
 
 from datetime import datetime
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
-from whatsnext.api.client.project import Project
 from whatsnext.api.client.job import Job
-from whatsnext.api.client.exceptions import EmptyQueueError
+from whatsnext.api.client.project import Project
 
 
 class TestProjectInit:
@@ -121,10 +120,7 @@ class TestProjectProperties:
     def test_queue(self):
         """Test queue property."""
         mock_server = MagicMock()
-        mock_server.get_queue.return_value = [
-            {"id": 1, "name": "job1"},
-            {"id": 2, "name": "job2"}
-        ]
+        mock_server.get_queue.return_value = [{"id": 1, "name": "job1"}, {"id": 2, "name": "job2"}]
 
         project = Project(id=1, _server=mock_server)
 
@@ -175,7 +171,7 @@ class TestProjectQueueOperations:
         jobs = [
             Job(name="job1", task="train", parameters={}),
             Job(name="job2", task="train", parameters={}),
-            Job(name="job3", task="train", parameters={})
+            Job(name="job3", task="train", parameters={}),
         ]
 
         result = project.extend_queue(jobs)
@@ -210,11 +206,7 @@ class TestProjectQueueOperations:
     def test_pop_queue_valid_index(self):
         """Test popping job at valid index."""
         mock_server = MagicMock()
-        mock_server.get_queue.return_value = [
-            {"id": 10, "name": "job1"},
-            {"id": 20, "name": "job2"},
-            {"id": 30, "name": "job3"}
-        ]
+        mock_server.get_queue.return_value = [{"id": 10, "name": "job1"}, {"id": 20, "name": "job2"}, {"id": 30, "name": "job3"}]
         mock_server.remove_job.return_value = True
 
         project = Project(id=1, _server=mock_server)
@@ -227,9 +219,7 @@ class TestProjectQueueOperations:
     def test_pop_queue_invalid_index_negative(self):
         """Test popping job at negative index."""
         mock_server = MagicMock()
-        mock_server.get_queue.return_value = [
-            {"id": 10, "name": "job1"}
-        ]
+        mock_server.get_queue.return_value = [{"id": 10, "name": "job1"}]
 
         project = Project(id=1, _server=mock_server)
 
@@ -241,9 +231,7 @@ class TestProjectQueueOperations:
     def test_pop_queue_invalid_index_too_large(self):
         """Test popping job at index beyond queue length."""
         mock_server = MagicMock()
-        mock_server.get_queue.return_value = [
-            {"id": 10, "name": "job1"}
-        ]
+        mock_server.get_queue.return_value = [{"id": 10, "name": "job1"}]
 
         project = Project(id=1, _server=mock_server)
 
@@ -268,9 +256,9 @@ class TestProjectFetchJob:
                 "parameters": {"lr": 0.01},
                 "status": "QUEUED",
                 "priority": 5,
-                "depends": {}
+                "depends": {},
             },
-            "num_pending": 10
+            "num_pending": 10,
         }
 
         project = Project(id=1, _server=mock_server)
@@ -297,20 +285,16 @@ class TestProjectFetchJob:
                 "parameters": {},
                 "status": "QUEUED",
                 "priority": 0,
-                "depends": {}
+                "depends": {},
             },
-            "num_pending": 5
+            "num_pending": 5,
         }
 
         project = Project(id=1, _server=mock_server)
 
         project.fetch_job(available_cpu=8, available_accelerators=4)
 
-        mock_server.fetch_job.assert_called_once_with(
-            project,
-            available_cpu=8,
-            available_accelerators=4
-        )
+        mock_server.fetch_job.assert_called_once_with(project, available_cpu=8, available_accelerators=4)
 
 
 class TestProjectCreateTask:

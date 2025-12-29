@@ -1,9 +1,7 @@
 """Tests for the Client class."""
 
 import signal
-from unittest.mock import MagicMock, patch, call
-
-import pytest
+from unittest.mock import MagicMock
 
 from whatsnext.api.client.client import Client
 from whatsnext.api.client.exceptions import EmptyQueueError
@@ -26,7 +24,7 @@ class TestClientInit:
             description="Test client",
             project=mock_project,
             formatter=formatter,
-            register_with_server=False
+            register_with_server=False,
         )
 
         assert client.entity == "test-entity"
@@ -55,7 +53,7 @@ class TestClientInit:
             formatter=formatter,
             available_cpu=16,
             available_accelerators=4,
-            register_with_server=False
+            register_with_server=False,
         )
 
         assert client.available_cpu == 16
@@ -70,12 +68,7 @@ class TestClientInit:
         formatter = CLIFormatter()
 
         client = Client(
-            entity="ml-team",
-            name="worker",
-            description="Worker",
-            project=mock_project,
-            formatter=formatter,
-            register_with_server=True
+            entity="ml-team", name="worker", description="Worker", project=mock_project, formatter=formatter, register_with_server=True
         )
 
         assert client._registered is True
@@ -90,12 +83,7 @@ class TestClientInit:
         formatter = CLIFormatter()
 
         client = Client(
-            entity="ml-team",
-            name="worker",
-            description="Worker",
-            project=mock_project,
-            formatter=formatter,
-            register_with_server=True
+            entity="ml-team", name="worker", description="Worker", project=mock_project, formatter=formatter, register_with_server=True
         )
 
         assert client._registered is False
@@ -112,7 +100,7 @@ class TestClientInit:
             description="Worker",
             project=mock_project,
             formatter=formatter,
-            register_with_server=True  # Will be skipped since no server
+            register_with_server=True,  # Will be skipped since no server
         )
 
         assert client._registered is False
@@ -127,14 +115,7 @@ class TestClientResourceManagement:
         mock_project._server = None
         formatter = CLIFormatter()
 
-        client = Client(
-            entity="test",
-            name="client",
-            description="test",
-            project=mock_project,
-            formatter=formatter,
-            register_with_server=False
-        )
+        client = Client(entity="test", name="client", description="test", project=mock_project, formatter=formatter, register_with_server=False)
 
         resource = client.allocate_resource(cpu=4, accelerator=["0", "1"])
 
@@ -150,14 +131,7 @@ class TestClientResourceManagement:
         mock_project._server = None
         formatter = CLIFormatter()
 
-        client = Client(
-            entity="test",
-            name="client",
-            description="test",
-            project=mock_project,
-            formatter=formatter,
-            register_with_server=False
-        )
+        client = Client(entity="test", name="client", description="test", project=mock_project, formatter=formatter, register_with_server=False)
 
         resource = client.allocate_resource(cpu=4, accelerator=[])
         assert len(client.active_resources) == 1
@@ -185,14 +159,7 @@ class TestClientWork:
         mock_project.fetch_job.side_effect = [mock_job, EmptyQueueError("No jobs")]
 
         formatter = CLIFormatter()
-        client = Client(
-            entity="test",
-            name="client",
-            description="test",
-            project=mock_project,
-            formatter=formatter,
-            register_with_server=False
-        )
+        client = Client(entity="test", name="client", description="test", project=mock_project, formatter=formatter, register_with_server=False)
 
         jobs_done = client.work()
 
@@ -216,14 +183,7 @@ class TestClientWork:
         mock_project.fetch_job.side_effect = mock_jobs + [EmptyQueueError("No jobs")]
 
         formatter = CLIFormatter()
-        client = Client(
-            entity="test",
-            name="client",
-            description="test",
-            project=mock_project,
-            formatter=formatter,
-            register_with_server=False
-        )
+        client = Client(entity="test", name="client", description="test", project=mock_project, formatter=formatter, register_with_server=False)
 
         jobs_done = client.work()
 
@@ -243,14 +203,7 @@ class TestClientWork:
         mock_project.fetch_job.side_effect = [mock_job, EmptyQueueError("No jobs")]
 
         formatter = CLIFormatter()
-        client = Client(
-            entity="test",
-            name="client",
-            description="test",
-            project=mock_project,
-            formatter=formatter,
-            register_with_server=False
-        )
+        client = Client(entity="test", name="client", description="test", project=mock_project, formatter=formatter, register_with_server=False)
 
         jobs_done = client.work()
 
@@ -264,14 +217,7 @@ class TestClientWork:
         mock_project.fetch_job.side_effect = EmptyQueueError("No jobs")
 
         formatter = CLIFormatter()
-        client = Client(
-            entity="test",
-            name="client",
-            description="test",
-            project=mock_project,
-            formatter=formatter,
-            register_with_server=False
-        )
+        client = Client(entity="test", name="client", description="test", project=mock_project, formatter=formatter, register_with_server=False)
 
         jobs_done = client.work()
 
@@ -293,15 +239,12 @@ class TestClientWork:
             formatter=formatter,
             available_cpu=8,
             available_accelerators=2,
-            register_with_server=False
+            register_with_server=False,
         )
 
         client.work(use_resource_filter=True)
 
-        mock_project.fetch_job.assert_called_with(
-            available_cpu=8,
-            available_accelerators=2
-        )
+        mock_project.fetch_job.assert_called_with(available_cpu=8, available_accelerators=2)
 
     def test_work_without_resource_filter(self):
         """Test work loop without resource filtering."""
@@ -311,14 +254,7 @@ class TestClientWork:
         mock_project.fetch_job.side_effect = EmptyQueueError("No jobs")
 
         formatter = CLIFormatter()
-        client = Client(
-            entity="test",
-            name="client",
-            description="test",
-            project=mock_project,
-            formatter=formatter,
-            register_with_server=False
-        )
+        client = Client(entity="test", name="client", description="test", project=mock_project, formatter=formatter, register_with_server=False)
 
         client.work(use_resource_filter=False)
 
@@ -332,14 +268,7 @@ class TestClientWork:
         mock_project.fetch_job.side_effect = EmptyQueueError("No jobs")
 
         formatter = CLIFormatter()
-        client = Client(
-            entity="test",
-            name="client",
-            description="test",
-            project=mock_project,
-            formatter=formatter,
-            register_with_server=False
-        )
+        client = Client(entity="test", name="client", description="test", project=mock_project, formatter=formatter, register_with_server=False)
 
         external_resource = Resource(cpu=2, accelerator=[], client=client)
         client.work(resource=external_resource)
@@ -361,14 +290,7 @@ class TestClientWork:
         mock_project.fetch_job.side_effect = [mock_job, EmptyQueueError("No jobs")]
 
         formatter = CLIFormatter()
-        client = Client(
-            entity="test",
-            name="client",
-            description="test",
-            project=mock_project,
-            formatter=formatter,
-            register_with_server=False
-        )
+        client = Client(entity="test", name="client", description="test", project=mock_project, formatter=formatter, register_with_server=False)
 
         # Should not raise, just exit cleanly
         jobs_done = client.work()
@@ -385,14 +307,7 @@ class TestClientWork:
         mock_project.fetch_job.side_effect = EmptyQueueError("No jobs")
 
         formatter = CLIFormatter()
-        client = Client(
-            entity="test",
-            name="client",
-            description="test",
-            project=mock_project,
-            formatter=formatter,
-            register_with_server=True
-        )
+        client = Client(entity="test", name="client", description="test", project=mock_project, formatter=formatter, register_with_server=True)
 
         client.work()
 
@@ -408,14 +323,7 @@ class TestClientSignalHandling:
         mock_project._server = None
         formatter = CLIFormatter()
 
-        client = Client(
-            entity="test",
-            name="client",
-            description="test",
-            project=mock_project,
-            formatter=formatter,
-            register_with_server=False
-        )
+        client = Client(entity="test", name="client", description="test", project=mock_project, formatter=formatter, register_with_server=False)
 
         assert client._shutdown_requested is False
 
@@ -430,14 +338,7 @@ class TestClientSignalHandling:
         mock_project._server = None
         formatter = CLIFormatter()
 
-        client = Client(
-            entity="test",
-            name="client",
-            description="test",
-            project=mock_project,
-            formatter=formatter,
-            register_with_server=False
-        )
+        client = Client(entity="test", name="client", description="test", project=mock_project, formatter=formatter, register_with_server=False)
 
         assert client._shutdown_requested is False
 
@@ -458,14 +359,7 @@ class TestClientDeactivation:
         mock_project._server = mock_server
 
         formatter = CLIFormatter()
-        client = Client(
-            entity="test",
-            name="client",
-            description="test",
-            project=mock_project,
-            formatter=formatter,
-            register_with_server=True
-        )
+        client = Client(entity="test", name="client", description="test", project=mock_project, formatter=formatter, register_with_server=True)
 
         assert client._registered is True
 
@@ -480,14 +374,7 @@ class TestClientDeactivation:
         mock_project._server = None
 
         formatter = CLIFormatter()
-        client = Client(
-            entity="test",
-            name="client",
-            description="test",
-            project=mock_project,
-            formatter=formatter,
-            register_with_server=False
-        )
+        client = Client(entity="test", name="client", description="test", project=mock_project, formatter=formatter, register_with_server=False)
 
         # Should not raise
         client._deactivate()

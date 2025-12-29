@@ -3,7 +3,6 @@
 import subprocess
 from unittest.mock import patch
 
-
 from whatsnext.api.client.formatter import CLIFormatter, RUNAIFormatter, SlurmFormatter
 
 

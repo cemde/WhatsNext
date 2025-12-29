@@ -18,7 +18,7 @@ app = FastAPI(
 
 # Add CORS middleware
 app.add_middleware(
-    CORSMiddleware,
+    CORSMiddleware,  # type: ignore[arg-type]  # Starlette middleware typing limitation
     allow_origins=settings.get_cors_origins(),
     allow_credentials=settings.cors_allow_credentials,
     allow_methods=[settings.cors_allow_methods] if settings.cors_allow_methods == "*" else settings.cors_allow_methods.split(","),
@@ -27,12 +27,12 @@ app.add_middleware(
 
 # Add rate limiting middleware (if enabled)
 if settings.rate_limit_per_minute > 0:
-    app.add_middleware(RateLimitMiddleware, requests_per_minute=settings.rate_limit_per_minute)
+    app.add_middleware(RateLimitMiddleware, requests_per_minute=settings.rate_limit_per_minute)  # type: ignore[arg-type]
 
 # Add authentication middleware (if API keys are configured)
 api_keys = settings.get_api_keys()
 if api_keys:
-    app.add_middleware(AuthenticationMiddleware, api_keys=api_keys)
+    app.add_middleware(AuthenticationMiddleware, api_keys=api_keys)  # type: ignore[arg-type]
 
 app.include_router(jobs.router)
 app.include_router(projects.router)

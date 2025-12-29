@@ -1,7 +1,8 @@
 """Shared pytest fixtures for WhatsNext tests."""
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 
 @pytest.fixture

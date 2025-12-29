@@ -6,9 +6,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from fastapi.testclient import TestClient
 
-from whatsnext.api.server import models, schemas
-from whatsnext.api.server.main import app
+from whatsnext.api.server import models
 from whatsnext.api.server.database import get_db
+from whatsnext.api.server.main import app
 
 
 # Create a mock database session
@@ -21,6 +21,7 @@ def mock_db():
 @pytest.fixture
 def client(mock_db):
     """Create a test client with mocked database."""
+
     def override_get_db():
         return mock_db
 
@@ -93,9 +94,7 @@ class TestProjectRoutes:
         mock_project1.created_at = datetime(2024, 1, 1, 0, 0, 0)
         mock_project1.updated_at = datetime(2024, 1, 1, 0, 0, 0)
 
-        mock_db.query.return_value.filter.return_value.limit.return_value.offset.return_value.all.return_value = [
-            mock_project1
-        ]
+        mock_db.query.return_value.filter.return_value.limit.return_value.offset.return_value.all.return_value = [mock_project1]
 
         response = client.get("/projects/")
 
@@ -109,6 +108,7 @@ class TestProjectRoutes:
 
     def test_create_project(self, client, mock_db):
         """Test creating a project."""
+
         def refresh_side_effect(obj):
             obj.id = 1
             obj.name = "new-project"
@@ -121,10 +121,7 @@ class TestProjectRoutes:
         mock_db.add.return_value = None
         mock_db.commit.return_value = None
 
-        response = client.post(
-            "/projects/",
-            json={"name": "new-project", "description": "New description"}
-        )
+        response = client.post("/projects/", json={"name": "new-project", "description": "New description"})
 
         assert response.status_code == 201
 
@@ -139,10 +136,7 @@ class TestProjectRoutes:
         mock_query.update.return_value = 1
         mock_db.query.return_value.filter.return_value = mock_query
 
-        response = client.put(
-            "/projects/1",
-            json={"name": "updated", "description": "Updated desc", "status": "ACTIVE"}
-        )
+        response = client.put("/projects/1", json={"name": "updated", "description": "Updated desc", "status": "ACTIVE"})
 
         assert response.status_code == 200
 
@@ -152,10 +146,7 @@ class TestProjectRoutes:
         mock_query.first.return_value = None
         mock_db.query.return_value.filter.return_value = mock_query
 
-        response = client.put(
-            "/projects/999",
-            json={"name": "updated", "description": "desc", "status": "ACTIVE"}
-        )
+        response = client.put("/projects/999", json={"name": "updated", "description": "desc", "status": "ACTIVE"})
 
         assert response.status_code == 404
 
@@ -301,9 +292,9 @@ class TestProjectRoutes:
             json={
                 "jobs": [
                     {"name": "job1", "task_id": 1, "parameters": {}, "priority": 0, "depends": {}},
-                    {"name": "job2", "task_id": 1, "parameters": {}, "priority": 0, "depends": {}}
+                    {"name": "job2", "task_id": 1, "parameters": {}, "priority": 0, "depends": {}},
                 ]
-            }
+            },
         )
 
         assert response.status_code == 201
@@ -312,10 +303,7 @@ class TestProjectRoutes:
         """Test adding batch to non-existent project."""
         mock_db.query.return_value.filter.return_value.first.return_value = None
 
-        response = client.post(
-            "/projects/999/jobs/batch",
-            json={"jobs": [{"name": "job1", "task_id": 1, "parameters": {}}]}
-        )
+        response = client.post("/projects/999/jobs/batch", json={"jobs": [{"name": "job1", "task_id": 1, "parameters": {}}]})
 
         assert response.status_code == 404
 
@@ -423,15 +411,7 @@ class TestJobRoutes:
 
         response = client.post(
             "/jobs/",
-            json={
-                "name": "new-job",
-                "project_id": 1,
-                "task_id": 1,
-                "parameters": {},
-                "status": "PENDING",
-                "priority": 0,
-                "depends": {}
-            }
+            json={"name": "new-job", "project_id": 1, "task_id": 1, "parameters": {}, "status": "PENDING", "priority": 0, "depends": {}},
         )
 
         assert response.status_code == 201
@@ -454,8 +434,8 @@ class TestJobRoutes:
                 "parameters": {},
                 "status": "PENDING",
                 "priority": 0,
-                "depends": {"1": "other-job"}
-            }
+                "depends": {"1": "other-job"},
+            },
         )
 
         assert response.status_code == 400
@@ -478,15 +458,7 @@ class TestJobRoutes:
 
         response = client.put(
             "/jobs/1",
-            json={
-                "name": "updated-job",
-                "project_id": 1,
-                "task_id": 1,
-                "parameters": {},
-                "status": "RUNNING",
-                "priority": 10,
-                "depends": {}
-            }
+            json={"name": "updated-job", "project_id": 1, "task_id": 1, "parameters": {}, "status": "RUNNING", "priority": 10, "depends": {}},
         )
 
         assert response.status_code == 200
@@ -502,15 +474,7 @@ class TestJobRoutes:
 
         response = client.put(
             "/jobs/999",
-            json={
-                "name": "updated",
-                "project_id": 1,
-                "task_id": 1,
-                "parameters": {},
-                "status": "PENDING",
-                "priority": 0,
-                "depends": {}
-            }
+            json={"name": "updated", "project_id": 1, "task_id": 1, "parameters": {}, "status": "PENDING", "priority": 0, "depends": {}},
         )
 
         assert response.status_code == 404
@@ -541,15 +505,7 @@ class TestJobRoutes:
 
         response = client.put(
             "/jobs/1",
-            json={
-                "name": "failed-job",
-                "project_id": 1,
-                "task_id": 1,
-                "parameters": {},
-                "status": "FAILED",
-                "priority": 0,
-                "depends": {}
-            }
+            json={"name": "failed-job", "project_id": 1, "task_id": 1, "parameters": {}, "status": "FAILED", "priority": 0, "depends": {}},
         )
 
         assert response.status_code == 200
@@ -715,6 +671,7 @@ class TestTaskRoutes:
 
     def test_create_task(self, client, mock_db):
         """Test creating a task."""
+
         def refresh_side_effect(obj):
             obj.id = 1
             obj.name = "new-task"
@@ -729,10 +686,7 @@ class TestTaskRoutes:
         mock_db.commit.return_value = None
         mock_db.refresh.side_effect = refresh_side_effect
 
-        response = client.post(
-            "/tasks/",
-            json={"name": "new-task", "project_id": 1}
-        )
+        response = client.post("/tasks/", json={"name": "new-task", "project_id": 1})
 
         assert response.status_code == 201
 
@@ -743,10 +697,7 @@ class TestTaskRoutes:
         mock_query.first.return_value = mock_task
         mock_db.query.return_value.filter.return_value = mock_query
 
-        response = client.put(
-            "/tasks/1",
-            json={"name": "updated-task", "project_id": 1, "required_cpu": 8}
-        )
+        response = client.put("/tasks/1", json={"name": "updated-task", "project_id": 1, "required_cpu": 8})
 
         assert response.status_code == 200
 
@@ -756,10 +707,7 @@ class TestTaskRoutes:
         mock_query.first.return_value = None
         mock_db.query.return_value.filter.return_value = mock_query
 
-        response = client.put(
-            "/tasks/999",
-            json={"name": "updated", "project_id": 1}
-        )
+        response = client.put("/tasks/999", json={"name": "updated", "project_id": 1})
 
         assert response.status_code == 404
 
@@ -836,6 +784,7 @@ class TestClientRoutes:
 
     def test_register_client(self, client, mock_db):
         """Test registering a client."""
+
         def refresh_side_effect(obj):
             obj.id = "new-client"
             obj.name = "worker1"
@@ -859,8 +808,8 @@ class TestClientRoutes:
                 "entity": "team1",
                 "description": "New worker",
                 "available_cpu": 8,
-                "available_accelerators": 2
-            }
+                "available_accelerators": 2,
+            },
         )
 
         assert response.status_code == 201
@@ -872,10 +821,7 @@ class TestClientRoutes:
         mock_query.first.return_value = mock_client_obj
         mock_db.query.return_value.filter.return_value = mock_query
 
-        response = client.put(
-            "/clients/client-123",
-            json={"available_cpu": 16}
-        )
+        response = client.put("/clients/client-123", json={"available_cpu": 16})
 
         assert response.status_code == 200
 
@@ -885,10 +831,7 @@ class TestClientRoutes:
         mock_query.first.return_value = None
         mock_db.query.return_value.filter.return_value = mock_query
 
-        response = client.put(
-            "/clients/nonexistent",
-            json={"available_cpu": 8}
-        )
+        response = client.put("/clients/nonexistent", json={"available_cpu": 8})
 
         assert response.status_code == 404
 

@@ -452,10 +452,7 @@ class TestServerAdditional:
         """Test getting queue."""
         mock_requests.get.return_value.raise_for_status = MagicMock()
         mock_requests.get.return_value.ok = True
-        mock_requests.get.return_value.json.return_value = [
-            {"id": 1, "name": "job1"},
-            {"id": 2, "name": "job2"}
-        ]
+        mock_requests.get.return_value.json.return_value = [{"id": 1, "name": "job1"}, {"id": 2, "name": "job2"}]
 
         server = Server("localhost", 8000)
         project = Project(1, server)
@@ -549,17 +546,11 @@ class TestServerAdditional:
         mock_requests.get.return_value.ok = True
         mock_requests.get.return_value.json.return_value = {"id": 1}
         mock_requests.post.return_value.status_code = 201
-        mock_requests.post.return_value.json.return_value = {
-            "created": 2,
-            "job_ids": [1, 2]
-        }
+        mock_requests.post.return_value.json.return_value = {"created": 2, "job_ids": [1, 2]}
 
         server = Server("localhost", 8000)
         project = Project(1, server)
-        jobs = [
-            Job(name="job1", task="train", parameters={}),
-            Job(name="job2", task="train", parameters={})
-        ]
+        jobs = [Job(name="job1", task="train", parameters={}), Job(name="job2", task="train", parameters={})]
 
         result = server.extend_queue(project, jobs)
 
@@ -602,11 +593,7 @@ class TestServerAdditional:
         mock_requests.post.return_value.status_code = 400
 
         server = Server("localhost", 8000)
-        result = server.register_client(
-            client_id="client123",
-            name="worker1",
-            entity="team1"
-        )
+        result = server.register_client(client_id="client123", name="worker1", entity="team1")
 
         assert result is False
 
@@ -640,11 +627,7 @@ class TestServerAdditional:
         mock_requests.put.return_value.ok = True
 
         server = Server("localhost", 8000)
-        result = server.update_client_resources(
-            "client123",
-            available_cpu=16,
-            available_accelerators=4
-        )
+        result = server.update_client_resources("client123", available_cpu=16, available_accelerators=4)
 
         assert result is True
 
@@ -692,6 +675,7 @@ class TestProjectConnectorAdditional:
         result = connector.get_last_updated(project)
 
         from datetime import datetime
+
         assert result == datetime(2024, 1, 15, 10, 30, 0)
 
     @patch("whatsnext.api.client.server.requests")
@@ -814,4 +798,5 @@ class TestProjectConnectorAdditional:
         result = connector.get_created_at(project)
 
         from datetime import datetime
+
         assert result == datetime(2024, 1, 1, 8, 0, 0)

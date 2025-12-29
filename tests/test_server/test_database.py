@@ -2,8 +2,6 @@
 
 from unittest.mock import MagicMock, patch
 
-import pytest
-
 
 class TestGetDb:
     """Tests for get_db function."""
@@ -40,7 +38,7 @@ class TestGetDb:
             from whatsnext.api.server.database import get_db
 
             gen = get_db()
-            session = next(gen)
+            next(gen)  # Get the session (unused in this test)
 
             # Simulate exception
             try:
@@ -63,11 +61,8 @@ class TestDatabaseURL:
             mock_db.port = "5432"
             mock_db.database = "testdb"
 
-            # The URL should be constructed as expected
-            expected_url = "postgresql://testuser:testpass@localhost:5432/testdb"
-
             # Import to trigger URL construction
-            import importlib
+
             import whatsnext.api.server.database as db_module
 
             # Check that the module has the expected structure

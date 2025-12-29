@@ -74,6 +74,12 @@ include = ["whatsnext*"]
 line-length = 144
 exclude = []
 
+[tool.ruff.lint]
+select = ["E", "F", "I"]  # E/F: pyflakes/pycodestyle, I: isort
+
+[tool.ruff.lint.isort]
+known-first-party = ["whatsnext"]
+
 [tool.pytest.ini_options]
 minversion = "6.0"
 addopts = "-ra -q"

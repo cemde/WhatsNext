@@ -22,3 +22,5 @@ jobs:
         run: uv sync --group dev
       - name: Lint with ruff
         run: uv run ruff check .
+      - name: Check import sorting
+        run: uv run ruff check --select I .

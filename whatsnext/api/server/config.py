@@ -47,6 +47,6 @@ class DBSettings:
         self.database = settings.database_name
 
 
-settings = Settings()
+settings = Settings()  # type: ignore[missing-argument]  # Loaded from environment variables
 
 db = DBSettings(settings)

@@ -1,10 +1,9 @@
 from sqlalchemy import Column, Enum, ForeignKey, Integer, String
+from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy.sql.expression import text
 from sqlalchemy.sql.sqltypes import JSON, TIMESTAMP
-from sqlalchemy.schema import UniqueConstraint
 
-from ..shared.status import JobStatus, ProjectStatus, DEFAULT_PROJECT_STATUS
-
+from ..shared.status import DEFAULT_PROJECT_STATUS, JobStatus, ProjectStatus
 from .database import Base
 
 

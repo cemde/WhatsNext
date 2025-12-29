@@ -2,14 +2,14 @@
 
 import asyncio
 import time
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from whatsnext.api.server.middleware import (
-    get_api_key_dependency,
-    RateLimitMiddleware,
     AuthenticationMiddleware,
+    RateLimitMiddleware,
+    get_api_key_dependency,
 )
 
 
@@ -144,8 +144,8 @@ class TestRateLimitMiddleware:
         current_time = time.time()
         middleware.request_times["127.0.0.1"] = [
             current_time - 100,  # old, should be removed
-            current_time - 30,   # recent, should stay
-            current_time - 10,   # recent, should stay
+            current_time - 30,  # recent, should stay
+            current_time - 10,  # recent, should stay
         ]
 
         middleware._clean_old_requests("127.0.0.1", current_time)
@@ -162,9 +162,7 @@ class TestRateLimitMiddleware:
         async def mock_call_next(req):
             return "response"
 
-        result = asyncio.get_event_loop().run_until_complete(
-            middleware.dispatch(mock_request, mock_call_next)
-        )
+        result = asyncio.get_event_loop().run_until_complete(middleware.dispatch(mock_request, mock_call_next))
 
         assert result == "response"
 
@@ -180,9 +178,7 @@ class TestRateLimitMiddleware:
         async def mock_call_next(req):
             return "response"
 
-        result = asyncio.get_event_loop().run_until_complete(
-            middleware.dispatch(mock_request, mock_call_next)
-        )
+        result = asyncio.get_event_loop().run_until_complete(middleware.dispatch(mock_request, mock_call_next))
 
         assert result == "response"
 
@@ -202,9 +198,7 @@ class TestRateLimitMiddleware:
         async def mock_call_next(req):
             return "response"
 
-        result = asyncio.get_event_loop().run_until_complete(
-            middleware.dispatch(mock_request, mock_call_next)
-        )
+        result = asyncio.get_event_loop().run_until_complete(middleware.dispatch(mock_request, mock_call_next))
 
         assert result.status_code == 429
 
@@ -226,11 +220,7 @@ class TestAuthenticationMiddleware:
         """Test middleware with custom excluded paths."""
         mock_app = MagicMock()
 
-        middleware = AuthenticationMiddleware(
-            mock_app,
-            api_keys=["key1"],
-            excluded_paths=["/custom"]
-        )
+        middleware = AuthenticationMiddleware(mock_app, api_keys=["key1"], excluded_paths=["/custom"])
 
         assert middleware.excluded_paths == ["/custom"]
 
@@ -245,9 +235,7 @@ class TestAuthenticationMiddleware:
         async def mock_call_next(req):
             return "response"
 
-        result = asyncio.get_event_loop().run_until_complete(
-            middleware.dispatch(mock_request, mock_call_next)
-        )
+        result = asyncio.get_event_loop().run_until_complete(middleware.dispatch(mock_request, mock_call_next))
 
         assert result == "response"
 
@@ -262,9 +250,7 @@ class TestAuthenticationMiddleware:
         async def mock_call_next(req):
             return "response"
 
-        result = asyncio.get_event_loop().run_until_complete(
-            middleware.dispatch(mock_request, mock_call_next)
-        )
+        result = asyncio.get_event_loop().run_until_complete(middleware.dispatch(mock_request, mock_call_next))
 
         assert result == "response"
 
@@ -280,9 +266,7 @@ class TestAuthenticationMiddleware:
         async def mock_call_next(req):
             return "response"
 
-        result = asyncio.get_event_loop().run_until_complete(
-            middleware.dispatch(mock_request, mock_call_next)
-        )
+        result = asyncio.get_event_loop().run_until_complete(middleware.dispatch(mock_request, mock_call_next))
 
         assert result.status_code == 401
 
@@ -298,9 +282,7 @@ class TestAuthenticationMiddleware:
         async def mock_call_next(req):
             return "response"
 
-        result = asyncio.get_event_loop().run_until_complete(
-            middleware.dispatch(mock_request, mock_call_next)
-        )
+        result = asyncio.get_event_loop().run_until_complete(middleware.dispatch(mock_request, mock_call_next))
 
         assert result.status_code == 403
 
@@ -316,8 +298,6 @@ class TestAuthenticationMiddleware:
         async def mock_call_next(req):
             return "response"
 
-        result = asyncio.get_event_loop().run_until_complete(
-            middleware.dispatch(mock_request, mock_call_next)
-        )
+        result = asyncio.get_event_loop().run_until_complete(middleware.dispatch(mock_request, mock_call_next))
 
         assert result == "response"

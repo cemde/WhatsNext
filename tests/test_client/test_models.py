@@ -1,15 +1,15 @@
 """Tests for client model classes: Artifact, Task, Resource, Job, utils."""
 
-from unittest.mock import MagicMock, patch
 import subprocess
+from unittest.mock import MagicMock
 
 import pytest
 
 from whatsnext.api.client.artifact import Artifact
-from whatsnext.api.client.task import Task
-from whatsnext.api.client.resource import Resource, RESOURCE_STATUS
-from whatsnext.api.client.utils import random_string, Status
 from whatsnext.api.client.job import Job
+from whatsnext.api.client.resource import RESOURCE_STATUS, Resource
+from whatsnext.api.client.task import Task
+from whatsnext.api.client.utils import Status, random_string
 
 
 class TestArtifact:
@@ -37,28 +37,18 @@ class TestTask:
 
     def test_task_with_command_template(self):
         """Test task with command template."""
-        task = Task(
-            name="train",
-            command_template="python train.py --lr {lr} --epochs {epochs}"
-        )
+        task = Task(name="train", command_template="python train.py --lr {lr} --epochs {epochs}")
         assert task._command_template == "python train.py --lr {lr} --epochs {epochs}"
 
     def test_task_with_artifacts_and_resource(self):
         """Test task with artifacts and resources."""
-        task = Task(
-            name="train",
-            artifacts=["model.pt", "logs/"],
-            resource=["gpu:1", "cpu:4"]
-        )
+        task = Task(name="train", artifacts=["model.pt", "logs/"], resource=["gpu:1", "cpu:4"])
         assert task.artifacts == ["model.pt", "logs/"]
         assert task.resource == ["gpu:1", "cpu:4"]
 
     def test_format_command_success(self):
         """Test successful command formatting."""
-        task = Task(
-            name="train",
-            command_template="python train.py --lr {lr} --epochs {epochs}"
-        )
+        task = Task(name="train", command_template="python train.py --lr {lr} --epochs {epochs}")
         command = task.format_command({"lr": 0.01, "epochs": 100})
         assert command == "python train.py --lr 0.01 --epochs 100"
 
@@ -70,10 +60,7 @@ class TestTask:
 
     def test_format_command_missing_param(self):
         """Test format_command with missing parameter."""
-        task = Task(
-            name="train",
-            command_template="python train.py --lr {lr} --epochs {epochs}"
-        )
+        task = Task(name="train", command_template="python train.py --lr {lr} --epochs {epochs}")
         with pytest.raises(KeyError):
             task.format_command({"lr": 0.01})  # missing epochs
 
@@ -159,11 +146,7 @@ class TestJob:
 
     def test_job_basic_init(self):
         """Test basic job initialization."""
-        job = Job(
-            name="experiment-1",
-            task="train-model",
-            parameters={"lr": 0.01}
-        )
+        job = Job(name="experiment-1", task="train-model", parameters={"lr": 0.01})
         assert job.name == "experiment-1"
         assert job.task == "train-model"
         assert job.parameters == {"lr": 0.01}
@@ -187,7 +170,7 @@ class TestJob:
             depends=[],
             created_at=now,
             updated_at=now,
-            id=42
+            id=42,
         )
         assert job.id == 42
         assert job.priority == 10
@@ -198,13 +181,7 @@ class TestJob:
 
     def test_job_repr(self):
         """Test job string representation."""
-        job = Job(
-            id=42,
-            name="experiment-1",
-            task="train",
-            parameters={},
-            priority=5
-        )
+        job = Job(id=42, name="experiment-1", task="train", parameters={}, priority=5)
         repr_str = repr(job)
         assert "42" in repr_str
         assert "experiment-1" in repr_str
@@ -286,10 +263,7 @@ class TestJob:
         mock_resource.client.formatter = mock_formatter
         mock_formatter.format.return_value = ["python", "script.py"]
         mock_formatter.execute.return_value = subprocess.CompletedProcess(
-            args=["python", "script.py"],
-            returncode=0,
-            stdout="output",
-            stderr=""
+            args=["python", "script.py"], returncode=0, stdout="output", stderr=""
         )
 
         exit_code = job.run(mock_resource)
@@ -311,10 +285,7 @@ class TestJob:
         mock_resource.client.formatter = mock_formatter
         mock_formatter.format.return_value = ["python", "script.py"]
         mock_formatter.execute.return_value = subprocess.CompletedProcess(
-            args=["python", "script.py"],
-            returncode=1,
-            stdout="",
-            stderr="Error occurred"
+            args=["python", "script.py"], returncode=1, stdout="", stderr="Error occurred"
         )
 
         exit_code = job.run(mock_resource)

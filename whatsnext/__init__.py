@@ -19,8 +19,14 @@ from typing import TYPE_CHECKING
 # Shared module has no external dependencies - always available
 from whatsnext.api.shared.status import (
     DEFAULT_JOB_STATUS as DEFAULT_JOB_STATUS,
+)
+from whatsnext.api.shared.status import (
     DEFAULT_PROJECT_STATUS as DEFAULT_PROJECT_STATUS,
+)
+from whatsnext.api.shared.status import (
     JobStatus as JobStatus,
+)
+from whatsnext.api.shared.status import (
     ProjectStatus as ProjectStatus,
 )
 

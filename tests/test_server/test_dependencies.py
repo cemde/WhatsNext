@@ -1,16 +1,14 @@
 """Tests for server dependency resolution utilities."""
 
-from unittest.mock import MagicMock, patch
-
-import pytest
+from unittest.mock import MagicMock
 
 from whatsnext.api.server.dependencies import (
-    get_dependency_ids,
     are_dependencies_completed,
-    has_failed_dependency,
     detect_circular_dependency,
-    propagate_failure,
+    get_dependency_ids,
     get_jobs_with_completed_dependencies,
+    has_failed_dependency,
+    propagate_failure,
 )
 from whatsnext.api.server.models import JobStatus
 
@@ -245,10 +243,7 @@ class TestPropagateFailure:
         dependent_job.status = JobStatus.PENDING
 
         # First iteration finds dependent_job, second returns empty
-        mock_db.query.return_value.filter.return_value.all.side_effect = [
-            [dependent_job],
-            []
-        ]
+        mock_db.query.return_value.filter.return_value.all.side_effect = [[dependent_job], []]
 
         result = propagate_failure(mock_db, failed_job)
 
