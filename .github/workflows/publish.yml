@@ -49,18 +49,36 @@ jobs:
           fi
           TAG_VERSION=${GITHUB_REF#refs/tags/v}
           PYPROJECT_VERSION=$(uv run python -c "import tomllib; print(tomllib.load(open('pyproject.toml', 'rb'))['project']['version'])")
+          CLI_VERSION=$(uv run python -c "from whatsnext.cli import __version__; print(__version__)")
+
+          echo "Tag version:        $TAG_VERSION"
+          echo "pyproject.toml:     $PYPROJECT_VERSION"
+          echo "CLI __version__:    $CLI_VERSION"
+
+          ERRORS=0
 
           if [ "$TAG_VERSION" != "$PYPROJECT_VERSION" ]; then
-            echo "ERROR: Tag version ($TAG_VERSION) doesn't match pyproject.toml version ($PYPROJECT_VERSION)"
+            echo "ERROR: Tag version doesn't match pyproject.toml"
+            ERRORS=1
+          fi
+
+          if [ "$TAG_VERSION" != "$CLI_VERSION" ]; then
+            echo "ERROR: Tag version doesn't match CLI __version__"
+            ERRORS=1
+          fi
+
+          if ! grep -q "## \[$TAG_VERSION\]" CHANGELOG.md; then
+            echo "ERROR: No CHANGELOG.md entry found for version $TAG_VERSION"
+            ERRORS=1
+          fi
+
+          if [ $ERRORS -ne 0 ]; then
+            echo ""
+            echo "Use 'uv run python scripts/bump_version.py' to update versions consistently"
             exit 1
           fi
-          echo "Version check passed: $TAG_VERSION"
 
-          # Check if CHANGELOG.md has an entry for this version
-          if ! grep -q "## \[$TAG_VERSION\]" CHANGELOG.md; then
-            echo "WARNING: No CHANGELOG.md entry found for version $TAG_VERSION"
-            echo "Consider adding release notes to CHANGELOG.md"
-          fi
+          echo "All version checks passed: $TAG_VERSION"
 
       - name: Extract changelog for release
         id: changelog
