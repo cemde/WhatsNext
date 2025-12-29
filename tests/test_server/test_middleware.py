@@ -43,7 +43,7 @@ class TestGetApiKeyDependency:
         mock_settings.get_api_keys.return_value = []
 
         dependency = get_api_key_dependency()
-        result = asyncio.get_event_loop().run_until_complete(dependency())
+        result = asyncio.run(dependency())
 
         assert result is None
 
@@ -53,7 +53,7 @@ class TestGetApiKeyDependency:
         mock_settings.get_api_keys.return_value = ["valid-key"]
 
         dependency = get_api_key_dependency()
-        result = asyncio.get_event_loop().run_until_complete(dependency(api_key="valid-key"))
+        result = asyncio.run(dependency(api_key="valid-key"))
 
         assert result == "valid-key"
 
@@ -67,7 +67,7 @@ class TestGetApiKeyDependency:
         dependency = get_api_key_dependency()
 
         with pytest.raises(HTTPException) as exc_info:
-            asyncio.get_event_loop().run_until_complete(dependency(api_key=None))
+            asyncio.run(dependency(api_key=None))
 
         assert exc_info.value.status_code == 401
 
@@ -81,7 +81,7 @@ class TestGetApiKeyDependency:
         dependency = get_api_key_dependency()
 
         with pytest.raises(HTTPException) as exc_info:
-            asyncio.get_event_loop().run_until_complete(dependency(api_key="invalid-key"))
+            asyncio.run(dependency(api_key="invalid-key"))
 
         assert exc_info.value.status_code == 403
 
@@ -162,7 +162,7 @@ class TestRateLimitMiddleware:
         async def mock_call_next(req):
             return "response"
 
-        result = asyncio.get_event_loop().run_until_complete(middleware.dispatch(mock_request, mock_call_next))
+        result = asyncio.run(middleware.dispatch(mock_request, mock_call_next))
 
         assert result == "response"
 
@@ -178,7 +178,7 @@ class TestRateLimitMiddleware:
         async def mock_call_next(req):
             return "response"
 
-        result = asyncio.get_event_loop().run_until_complete(middleware.dispatch(mock_request, mock_call_next))
+        result = asyncio.run(middleware.dispatch(mock_request, mock_call_next))
 
         assert result == "response"
 
@@ -198,7 +198,7 @@ class TestRateLimitMiddleware:
         async def mock_call_next(req):
             return "response"
 
-        result = asyncio.get_event_loop().run_until_complete(middleware.dispatch(mock_request, mock_call_next))
+        result = asyncio.run(middleware.dispatch(mock_request, mock_call_next))
 
         assert result.status_code == 429
 
@@ -235,7 +235,7 @@ class TestAuthenticationMiddleware:
         async def mock_call_next(req):
             return "response"
 
-        result = asyncio.get_event_loop().run_until_complete(middleware.dispatch(mock_request, mock_call_next))
+        result = asyncio.run(middleware.dispatch(mock_request, mock_call_next))
 
         assert result == "response"
 
@@ -250,7 +250,7 @@ class TestAuthenticationMiddleware:
         async def mock_call_next(req):
             return "response"
 
-        result = asyncio.get_event_loop().run_until_complete(middleware.dispatch(mock_request, mock_call_next))
+        result = asyncio.run(middleware.dispatch(mock_request, mock_call_next))
 
         assert result == "response"
 
@@ -266,7 +266,7 @@ class TestAuthenticationMiddleware:
         async def mock_call_next(req):
             return "response"
 
-        result = asyncio.get_event_loop().run_until_complete(middleware.dispatch(mock_request, mock_call_next))
+        result = asyncio.run(middleware.dispatch(mock_request, mock_call_next))
 
         assert result.status_code == 401
 
@@ -282,7 +282,7 @@ class TestAuthenticationMiddleware:
         async def mock_call_next(req):
             return "response"
 
-        result = asyncio.get_event_loop().run_until_complete(middleware.dispatch(mock_request, mock_call_next))
+        result = asyncio.run(middleware.dispatch(mock_request, mock_call_next))
 
         assert result.status_code == 403
 
@@ -298,6 +298,6 @@ class TestAuthenticationMiddleware:
         async def mock_call_next(req):
             return "response"
 
-        result = asyncio.get_event_loop().run_until_complete(middleware.dispatch(mock_request, mock_call_next))
+        result = asyncio.run(middleware.dispatch(mock_request, mock_call_next))
 
         assert result == "response"

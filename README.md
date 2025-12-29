@@ -6,6 +6,9 @@
   </picture>
 </p>
 
+> **Warning**
+> This is a private project in early development. It has not been security audited and is strongly advised against running on public-facing servers. Use only in trusted, internal environments.
+
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
 [![PyPI version](https://badge.fury.io/py/whatsnext.svg)](https://badge.fury.io/py/whatsnext)
 [![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](https://whatsnext.readthedocs.io/)

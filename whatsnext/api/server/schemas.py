@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from ..shared.status import DEFAULT_JOB_STATUS, DEFAULT_PROJECT_STATUS, JobStatus, ProjectStatus
 
@@ -48,30 +48,27 @@ class JobUpdate(JobBase):
 
 
 class JobResponse(JobBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     created_at: datetime
     updated_at: datetime
 
-    class Config:
-        from_attributes = True
-
 
 class JobWithTaskNameResponse(JobBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     created_at: datetime
     updated_at: datetime
     task_name: str
 
-    class Config:
-        from_attributes = True
-
 
 class JobAndCountResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     job: Optional[JobWithTaskNameResponse] = None
     num_pending: int
-
-    class Config:
-        from_attributes = True
 
 
 class JobBatchItem(BaseModel):
@@ -142,12 +139,11 @@ class ProjectUpdate(ProjectBase):
 
 
 class ProjectResponse(ProjectBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class TaskBase(BaseModel):
@@ -170,15 +166,14 @@ class TaskUpdate(BaseModel):
 
 
 class TaskResponse(TaskBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     command_template: Optional[str] = None
     required_cpu: int
     required_accelerators: int
     created_at: datetime
     updated_at: datetime
-
-    class Config:
-        from_attributes = True
 
 
 class ClientBase(BaseModel):
@@ -200,10 +195,9 @@ class ClientUpdate(BaseModel):
 
 
 class ClientResponse(ClientBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     last_heartbeat: datetime
     created_at: datetime
     is_active: int
-
-    class Config:
-        from_attributes = True

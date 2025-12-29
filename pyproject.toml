@@ -11,15 +11,15 @@ readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: GNU Affero General Public License v3",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-    "Programming Language :: Python :: 3.13",
-    "Topic :: Software Development :: Libraries :: Python Modules",
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: GNU Affero General Public License v3",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 # Core has no dependencies - client and server are optional
 dependencies = []
@@ -27,27 +27,19 @@ dependencies = []
 [project.optional-dependencies]
 # Server dependencies (FastAPI + PostgreSQL)
 server = [
-    "fastapi>=0.100.0",
-    "sqlalchemy>=2.0.0",
-    "psycopg2-binary>=2.9.0",
-    "pydantic-settings>=2.0.0",
-    "uvicorn>=0.20.0",
-    "alembic>=1.13.0",
+  "fastapi>=0.100.0",
+  "sqlalchemy>=2.0.0",
+  "psycopg2-binary>=2.9.0",
+  "pydantic-settings>=2.0.0",
+  "uvicorn>=0.20.0",
+  "alembic>=1.13.0",
 ]
 
 # Client dependencies
-client = [
-    "requests>=2.28.0",
-    "tabulate>=0.9.0",
-]
+client = ["requests>=2.28.0", "tabulate>=0.9.0"]
 
 # CLI dependencies
-cli = [
-    "typer>=0.9.0",
-    "rich>=13.0.0",
-    "pyyaml>=6.0",
-    "whatsnext[client]",
-]
+cli = ["typer>=0.9.0", "rich>=13.0.0", "pyyaml>=6.0", "whatsnext[client]"]
 
 # All dependencies
 all = ["whatsnext[server,client,cli]"]
@@ -64,19 +56,19 @@ Documentation = "https://whatsnext.readthedocs.io/"
 [dependency-groups]
 # Development tools (linting, testing, type checking)
 dev = [
-    "pytest>=9.0.0",
-    "pytest-cov>=7.0.0",
-    "httpx>=0.27.0",
-    "ruff>=0.14.0",
-    "ty>=0.0.5",
+  "pytest>=9.0.0",
+  "pytest-cov>=7.0.0",
+  "httpx>=0.27.0",
+  "ruff>=0.14.0",
+  "ty>=0.0.5",
 ]
 
 # Documentation building
 docs = [
-    "mkdocs>=1.6",
-    "mkdocs-material>=9.7.0",
-    "mkdocstrings[python]>=1.0.0",
-    "pymdown-extensions>=10.0.0",
+  "mkdocs>=1.6",
+  "mkdocs-material>=9.7.0",
+  "mkdocstrings[python]>=1.0.0",
+  "pymdown-extensions>=10.0.0",
 ]
 
 [tool.setuptools.packages.find]
@@ -88,7 +80,7 @@ line-length = 144
 exclude = []
 
 [tool.ruff.lint]
-select = ["E", "F", "I"]  # E/F: pyflakes/pycodestyle, I: isort
+select = ["E", "F", "I"] # E/F: pyflakes/pycodestyle, I: isort
 
 [tool.ruff.lint.isort]
 known-first-party = ["whatsnext"]
@@ -98,9 +90,9 @@ minversion = "6.0"
 addopts = "-ra -q"
 testpaths = ["tests"]
 markers = [
-    "server: Tests that require server dependencies",
-    "client: Tests that require client dependencies",
-    "integration: Integration tests requiring both server and client",
+  "server: Tests that require server dependencies",
+  "client: Tests that require client dependencies",
+  "integration: Integration tests requiring both server and client",
 ]
 
 [tool.coverage.run]
@@ -111,13 +103,13 @@ branch = true
 
 [tool.coverage.report]
 exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if __name__ == .__main__.:",
-    "if TYPE_CHECKING:",
-    "@abstractmethod",
+  "pragma: no cover",
+  "def __repr__",
+  "raise AssertionError",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+  "@abstractmethod",
 ]
 precision = 2
 

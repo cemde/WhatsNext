@@ -29,7 +29,7 @@ class TestServerAPIDocumentation:
         from whatsnext.api.server.main import app
 
         # Check that routes exist
-        routes = [route.path for route in app.routes]
+        routes = [route.path for route in app.routes if hasattr(route, "path")]
 
         # Root endpoints
         assert "/" in routes

@@ -1,9 +1,11 @@
 from typing import List, Optional
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env")
+
     database_hostname: str
     database_port: int
     database_user: str
@@ -21,9 +23,6 @@ class Settings(BaseSettings):
 
     # Rate limiting (requests per minute, 0 = disabled)
     rate_limit_per_minute: int = 0
-
-    class Config:
-        env_file = ".env"
 
     def get_api_keys(self) -> List[str]:
         """Return list of valid API keys, or empty list if auth is disabled."""
