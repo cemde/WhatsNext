@@ -4,7 +4,7 @@ from typer.testing import CliRunner
 
 from whatsnext.cli import __version__, app
 
-runner = CliRunner()
+runner = CliRunner(env={"NO_COLOR": "1", "TERM": "dumb"})
 
 
 class TestMainApp:
