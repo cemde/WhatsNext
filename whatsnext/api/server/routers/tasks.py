@@ -1,17 +1,25 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
 from ..database import get_db
 from ..validate_in_db import validate_project_exists
 
+# Maximum items per page to prevent DoS via large queries
+MAX_PAGE_SIZE = 1000
+
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
 
 @router.get("/", response_model=List[schemas.TaskResponse])
-def get_tasks(db: Session = Depends(get_db), limit: int = 10, skip: int = 0, project_id: Optional[int] = None):
+def get_tasks(
+    db: Session = Depends(get_db),
+    limit: int = Query(default=10, ge=1, le=MAX_PAGE_SIZE, description="Maximum number of items to return"),
+    skip: int = Query(default=0, ge=0, description="Number of items to skip"),
+    project_id: Optional[int] = None,
+):
     if project_id is None:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="project_id is required")
 

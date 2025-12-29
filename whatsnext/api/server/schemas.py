@@ -1,9 +1,13 @@
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
-from ..shared.status import DEFAULT_JOB_STATUS, DEFAULT_PROJECT_STATUS
+from ..shared.status import DEFAULT_JOB_STATUS, DEFAULT_PROJECT_STATUS, JobStatus, ProjectStatus
+
+# Valid status values for validation
+JOB_STATUS_VALUES = tuple(s.value for s in JobStatus)
+PROJECT_STATUS_VALUES = tuple(s.value for s in ProjectStatus)
 
 
 class JobBase(BaseModel):
@@ -18,11 +22,29 @@ class JobCreate(JobBase):
     priority: int = 0
     depends: Dict[str, Any] = Field(default_factory=dict)
 
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v: str) -> str:
+        # Normalize to lowercase for comparison
+        v_lower = v.lower()
+        if v_lower not in JOB_STATUS_VALUES:
+            raise ValueError(f"Invalid status '{v}'. Must be one of: {', '.join(JOB_STATUS_VALUES)}")
+        return v_lower
+
 
 class JobUpdate(JobBase):
     status: str
     priority: int
     depends: Dict[str, Any]
+
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v: str) -> str:
+        # Normalize to lowercase for comparison
+        v_lower = v.lower()
+        if v_lower not in JOB_STATUS_VALUES:
+            raise ValueError(f"Invalid status '{v}'. Must be one of: {', '.join(JOB_STATUS_VALUES)}")
+        return v_lower
 
 
 class JobResponse(JobBase):
@@ -98,9 +120,25 @@ class ProjectCreate(ProjectBase):
     status: str = DEFAULT_PROJECT_STATUS.value
     description: str = ""
 
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v: str) -> str:
+        # Normalize to lowercase for comparison
+        v_lower = v.lower()
+        if v_lower not in PROJECT_STATUS_VALUES:
+            raise ValueError(f"Invalid status '{v}'. Must be one of: {', '.join(PROJECT_STATUS_VALUES)}")
+        return v_lower
+
 
 class ProjectUpdate(ProjectBase):
-    pass
+    @field_validator("status")
+    @classmethod
+    def validate_status(cls, v: str) -> str:
+        # Normalize to lowercase for comparison
+        v_lower = v.lower()
+        if v_lower not in PROJECT_STATUS_VALUES:
+            raise ValueError(f"Invalid status '{v}'. Must be one of: {', '.join(PROJECT_STATUS_VALUES)}")
+        return v_lower
 
 
 class ProjectResponse(ProjectBase):

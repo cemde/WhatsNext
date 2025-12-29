@@ -1,5 +1,6 @@
 """Middleware for authentication, CORS, and rate limiting."""
 
+import secrets
 import time
 from collections import defaultdict
 from typing import Callable, Dict, List, Optional
@@ -10,6 +11,20 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.responses import Response
 
 from .config import settings
+
+
+def _constant_time_compare(provided_key: str, valid_keys: List[str]) -> bool:
+    """Compare API key against valid keys using constant-time comparison.
+
+    This prevents timing attacks that could leak information about valid keys.
+    """
+    # We must compare against all keys to ensure constant time
+    # regardless of which key (if any) matches
+    result = False
+    for valid_key in valid_keys:
+        if secrets.compare_digest(provided_key.encode(), valid_key.encode()):
+            result = True
+    return result
 
 # API key header
 API_KEY_HEADER = APIKeyHeader(name="X-API-Key", auto_error=False)
@@ -32,7 +47,7 @@ def get_api_key_dependency():
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="API key required. Provide X-API-Key header.",
             )
-        if api_key not in api_keys:
+        if not _constant_time_compare(api_key, api_keys):
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Invalid API key.",
@@ -124,7 +139,7 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
                 status_code=status.HTTP_401_UNAUTHORIZED,
             )
 
-        if api_key not in self.api_keys:
+        if not _constant_time_compare(api_key, self.api_keys):
             return Response(
                 content="Invalid API key.",
                 status_code=status.HTTP_403_FORBIDDEN,

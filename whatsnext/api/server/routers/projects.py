@@ -1,11 +1,14 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
 from ..database import get_db
 from ..dependencies import get_jobs_with_completed_dependencies
+
+# Maximum items per page to prevent DoS via large queries
+MAX_PAGE_SIZE = 1000
 
 router = APIRouter(prefix="/projects", tags=["Projects"])
 
@@ -29,8 +32,8 @@ def get_project_by_name(name: str, db: Session = Depends(get_db)):
 @router.get("/", response_model=List[schemas.ProjectResponse])
 def get_projects(
     db: Session = Depends(get_db),
-    limit: int = 10,
-    skip: int = 0,
+    limit: int = Query(default=10, ge=1, le=MAX_PAGE_SIZE, description="Maximum number of items to return"),
+    skip: int = Query(default=0, ge=0, description="Number of items to skip"),
     status_filter: Optional[str] = "ACTIVE",
 ):
     if status_filter and status_filter not in models.ProjectStatus.__members__:

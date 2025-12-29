@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from .. import models, schemas
@@ -14,6 +14,9 @@ from ..dependencies import (
 )
 from ..validate_in_db import validate_project_exists, validate_task_in_project_exists
 
+# Maximum items per page to prevent DoS via large queries
+MAX_PAGE_SIZE = 1000
+
 router = APIRouter(prefix="/jobs", tags=["Jobs"])
 
 
@@ -26,7 +29,12 @@ def get_job(id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/", response_model=List[schemas.JobResponse])
-def get_jobs(db: Session = Depends(get_db), limit: int = 10, skip: int = 0, project_id: Optional[int] = None):
+def get_jobs(
+    db: Session = Depends(get_db),
+    limit: int = Query(default=10, ge=1, le=MAX_PAGE_SIZE, description="Maximum number of items to return"),
+    skip: int = Query(default=0, ge=0, description="Number of items to skip"),
+    project_id: Optional[int] = None,
+):
     query = db.query(models.Job)
     if project_id is not None:
         query = query.filter(models.Job.project_id == project_id)
