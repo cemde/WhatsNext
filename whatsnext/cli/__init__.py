@@ -5,7 +5,7 @@ from typing import Optional
 import typer
 from rich.console import Console
 
-from .commands import auth, clients, init, jobs, projects, queue, status, tasks, worker
+from .commands import auth, clients, db, init, jobs, projects, queue, status, tasks, worker
 
 __version__ = "0.0.1"
 
@@ -23,6 +23,7 @@ app.add_typer(tasks.app, name="tasks", help="Manage tasks")
 app.add_typer(jobs.app, name="jobs", help="Manage jobs")
 app.add_typer(queue.app, name="queue", help="View and manage the job queue")
 app.add_typer(clients.app, name="clients", help="View connected clients")
+app.add_typer(db.app, name="db", help="Database migrations (server-side)")
 app.command(name="init")(init.init_config)
 app.command(name="worker")(worker.start_worker)
 app.command(name="status")(status.show_status)

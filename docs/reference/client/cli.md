@@ -612,6 +612,127 @@ whatsnext clients delete CLIENT_ID [OPTIONS]
 
 ---
 
+## Database Commands (Server-Side)
+
+These commands manage database migrations. Run them on the server machine.
+
+### db upgrade
+
+Apply pending database migrations.
+
+```bash
+whatsnext db upgrade [REVISION]
+```
+
+**Arguments:**
+
+| Argument | Default | Description |
+|----------|---------|-------------|
+| `REVISION` | `head` | Target revision (`head` = latest, `+1` = next one) |
+
+**Examples:**
+
+```bash
+# Apply all pending migrations
+whatsnext db upgrade
+
+# Apply only the next migration
+whatsnext db upgrade +1
+```
+
+---
+
+### db downgrade
+
+Rollback database migrations.
+
+```bash
+whatsnext db downgrade [REVISION]
+```
+
+**Arguments:**
+
+| Argument | Default | Description |
+|----------|---------|-------------|
+| `REVISION` | `-1` | Target revision (`-1` = previous, `base` = all) |
+
+**Examples:**
+
+```bash
+# Rollback one migration
+whatsnext db downgrade
+
+# Rollback all migrations (caution!)
+whatsnext db downgrade base
+```
+
+---
+
+### db status
+
+Show current database migration status.
+
+```bash
+whatsnext db status
+```
+
+---
+
+### db history
+
+Show all available migrations.
+
+```bash
+whatsnext db history
+```
+
+---
+
+### db stamp
+
+Mark database at a revision without running migrations.
+
+```bash
+whatsnext db stamp REVISION
+```
+
+Useful for existing databases that already have the schema.
+
+**Example:**
+
+```bash
+# Mark existing database as up-to-date
+whatsnext db stamp head
+```
+
+---
+
+### db init
+
+Initialize the database.
+
+```bash
+whatsnext db init [OPTIONS]
+```
+
+**Options:**
+
+| Option | Description |
+|--------|-------------|
+| `--stamp` | Stamp existing database instead of running migrations |
+
+**Examples:**
+
+```bash
+# New database: run all migrations
+whatsnext db init
+
+# Existing database: just mark as current
+whatsnext db init --stamp
+```
+
+---
+
 ## Exit Codes
 
 | Code | Meaning |

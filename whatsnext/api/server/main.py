@@ -1,3 +1,5 @@
+import os
+
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -8,7 +10,11 @@ from .database import engine, get_db
 from .middleware import AuthenticationMiddleware, RateLimitMiddleware
 from .routers import clients, jobs, projects, tasks
 
-models.Base.metadata.create_all(bind=engine)
+# Database initialization
+# In production, use migrations: `whatsnext db upgrade` or `alembic upgrade head`
+# For development convenience, auto-create can be enabled with AUTO_CREATE_TABLES=true
+if os.environ.get("AUTO_CREATE_TABLES", "").lower() in ("true", "1", "yes"):
+    models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="WhatsNext API",

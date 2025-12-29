@@ -180,7 +180,30 @@ API keys are simple passwords that clients must provide to use your server:
 
 ---
 
-## Step 4: Start the Server
+## Step 4: Initialize the Database
+
+Before starting the server, create the database tables:
+
+```bash
+# Run database migrations
+whatsnext db upgrade
+```
+
+You should see:
+```
+Upgrading database to revision: head
+
+INFO  [alembic.runtime.migration] Running upgrade  -> 0001, Initial schema
+Database upgraded successfully.
+```
+
+!!! tip "For existing databases"
+    If your database already has tables (from a previous installation), stamp it instead:
+    ```bash
+    whatsnext db init --stamp
+    ```
+
+## Step 5: Start the Server
 
 Now start the WhatsNext API server:
 
@@ -209,7 +232,7 @@ INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
 
 ---
 
-## Step 5: Verify It Works
+## Step 6: Verify It Works
 
 Test from the server machine:
 
@@ -396,6 +419,29 @@ psql -h localhost -U whatsnext -d whatsnext
 ### Server stops when I close SSH
 
 Use screen, tmux, or systemd. See [Keeping the Server Running](#keeping-the-server-running).
+
+---
+
+## Updating WhatsNext
+
+When updating to a new version:
+
+```bash
+# 1. Stop the server
+sudo systemctl stop whatsnext  # or Ctrl+C if running manually
+
+# 2. Update the package
+pip install --upgrade whatsnext[server]
+
+# 3. Run database migrations
+whatsnext db upgrade
+
+# 4. Restart the server
+sudo systemctl start whatsnext
+```
+
+!!! warning "Always run migrations after updating"
+    New versions may include database schema changes. Running `whatsnext db upgrade` applies any pending migrations safely.
 
 ---
 
