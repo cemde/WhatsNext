@@ -312,6 +312,40 @@ my-job-queue/
 └── run_worker.py        # Process jobs from queue
 ```
 
+## Alternative: Using the CLI
+
+If you prefer working from the command line, you can do everything above using the WhatsNext CLI:
+
+```bash
+# Initialize a config file
+whatsnext init --server localhost --port 8000 --project data-processing
+
+# Create the project
+whatsnext projects create data-processing --description "Process data files"
+
+# Create a task
+whatsnext tasks create process-file --project data-processing
+
+# Add jobs to the queue
+whatsnext jobs add process-file --project data-processing \
+    --name "process-data1.csv" \
+    --param input=data1.csv \
+    --param output=output_data1.csv
+
+whatsnext jobs add process-file --project data-processing \
+    --name "process-data2.csv" \
+    --param input=data2.csv \
+    --param output=output_data2.csv
+
+# Check the queue
+whatsnext queue ls
+
+# Start a worker
+whatsnext worker --project data-processing
+```
+
+See the [CLI documentation](cli.md) for more details.
+
 ## Next Steps
 
 Now that you have the basics working:

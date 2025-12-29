@@ -84,6 +84,7 @@ nav:
   - Home: index.md
   - Getting Started:
       - Quickstart: getting-started/quickstart.md
+      - Command Line Interface: getting-started/cli.md
       - Configuration: getting-started/configuration.md
       - Formatters: getting-started/formatters.md
       - Deployment: getting-started/deployment.md

@@ -6,10 +6,11 @@ WhatsNext helps you manage and execute background jobs across multiple machines.
 
 ## Why WhatsNext?
 
-- **Simple**: Just a few lines of code to get started
+- **Simple**: Just a few lines of code to get started, or use the CLI
 - **Reliable**: Jobs are stored in PostgreSQL, so nothing gets lost
 - **Scalable**: Run multiple workers on different machines
 - **Flexible**: Works with any Python code, SLURM clusters, or Kubernetes
+- **CLI Included**: Manage jobs from your terminal with `whatsnext` or `wnxt`
 
 ## How It Works
 
@@ -68,29 +69,36 @@ client.work()  # Runs until queue is empty
 === "With uv (Recommended)"
 
     ```bash
-    # Install everything (client + server)
+    # Install everything (client + server + CLI)
     uv pip install whatsnext[all]
     ```
 
 === "With pip"
 
     ```bash
-    # Install everything (client + server)
+    # Install everything (client + server + CLI)
     pip install whatsnext[all]
+    ```
+
+=== "CLI Only"
+
+    ```bash
+    # If you only need the command-line interface
+    pip install whatsnext[cli]
     ```
 
 === "Client Only"
 
     ```bash
-    # If you only need to submit/manage jobs
-    uv pip install whatsnext[client]
+    # If you only need to submit/manage jobs from Python
+    pip install whatsnext[client]
     ```
 
 === "Server Only"
 
     ```bash
     # If you only need to run the API server
-    uv pip install whatsnext[server]
+    pip install whatsnext[server]
     ```
 
 ## What's Next?
@@ -102,6 +110,12 @@ client.work()  # Runs until queue is empty
     ---
 
     Get up and running in 5 minutes with a complete working example
+
+-   :material-console: **[Command Line Interface](getting-started/cli.md)**
+
+    ---
+
+    Manage jobs, projects, and workers from your terminal
 
 -   :material-cog: **[Configuration](getting-started/configuration.md)**
 
